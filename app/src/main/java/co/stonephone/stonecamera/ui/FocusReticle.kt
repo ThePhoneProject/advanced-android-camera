@@ -1,5 +1,6 @@
 package co.stonephone.stonecamera.ui
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,15 +21,27 @@ fun FocusReticle(
     y: Float,
     initialBrightness: Float = 0f,
     onDismissFocus: () -> Unit,
-    onSetBrightness: (Float) -> Unit
+    onSetBrightness: (Float) -> Unit,
+    visibleDimensions: List<Float>,
+    context: Context
 ) {
     var brightness by remember { mutableStateOf(initialBrightness) }
-    val focusReticleSize = 70.dp
+    val focusReticleSize = 70
     val reticleHalf = focusReticleSize / 2
+    val (topOfVisible, bottomOfVisible, leftOfVisible, rightOfVisible) = visibleDimensions
+    val minY = topOfVisible + 10
+    val maxY = bottomOfVisible - (focusReticleSize * 2 + 10)
+    val minX = leftOfVisible + 10
+    val maxX = rightOfVisible - (focusReticleSize * 2 + 10)
+
     Box(
         modifier = Modifier
-            .offset(x.dp - reticleHalf, y.dp - reticleHalf)
-            .size(focusReticleSize)
+//            .offset(x.dp - reticleHalf.dp, y.dp - reticleHalf.dp)
+            .offset(
+                pxToDp(maxOf(minOf(x, maxX), minX) - reticleHalf, context).dp,
+                pxToDp(maxOf(minOf(y, maxY), minY) - reticleHalf, context).dp
+            )
+            .size(focusReticleSize.dp)
             .background(Color.Transparent)
             .border(1.dp, Color(0xAAFFCC00))
     ) {
@@ -70,10 +83,15 @@ fun FocusReticle(
                     inactiveTrackColor = Color.Gray
                 ),
                 modifier = Modifier
-                    .width(focusReticleSize)
+                    .width(focusReticleSize.dp)
                     .height(5.dp)
                     .padding(0.dp)
             )
         }
     }
+}
+
+fun pxToDp(px: Float, context: Context): Float {
+    val density = context.resources.displayMetrics.density
+    return px / density
 }

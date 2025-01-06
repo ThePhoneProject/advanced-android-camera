@@ -52,6 +52,7 @@ class StoneCameraViewModel : ViewModel() {
     var selectedMode by mutableStateOf("Photo")
         private set
 
+    // TODO: make it save between sessions
     var showShutterFlash by mutableStateOf(false)
         private set
 
@@ -124,6 +125,7 @@ class StoneCameraViewModel : ViewModel() {
      */
     fun setZoom(zoomFactor: Float) {
         val oldZoom = relativeZoomFactor
+//        relativeZoomFactor = zoomFactor
 
         // If difference in zoom is above threshold, we auto-cancel focus
         if (kotlin.math.abs(zoomFactor - oldZoom) > ZOOM_CANCEL_THRESHOLD) {

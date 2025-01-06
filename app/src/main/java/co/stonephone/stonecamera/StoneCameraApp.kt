@@ -7,6 +7,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import android.view.ScaleGestureDetector
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.*
@@ -19,6 +20,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlashAuto
+import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.FlipCameraIos
 import androidx.compose.material3.Icon
@@ -41,12 +45,11 @@ import co.stonephone.stonecamera.ui.ShutterFlashOverlay
 import co.stonephone.stonecamera.ui.StoneCameraPreview
 import co.stonephone.stonecamera.ui.ZoomBar
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
+import co.stonephone.stonecamera.utils.getVisibleRange
 import kotlinx.coroutines.delay
 import java.util.Locale
 
 val shootModes = arrayOf("Photo", "Video")
-
-private var previewView: PreviewView? = null
 
 @OptIn(ExperimentalCamera2Interop::class)
 @SuppressLint("ClickableViewAccessibility")
@@ -60,26 +63,19 @@ fun StoneCameraApp(
 
     // Observe states from the ViewModel
     val camera = stoneCameraViewModel.camera
-    val imageCapture = stoneCameraViewModel.imageCapture
+    val imageCapture by remember { stoneCameraViewModel::imageCapture }
     val videoCapture = stoneCameraViewModel.videoCapture
+    var previewView: PreviewView? by remember { mutableStateOf(null) }
 
     val selectedCameraId = stoneCameraViewModel.selectedCameraId
     val facing = stoneCameraViewModel.facing
-    val relativeZoomFactor = stoneCameraViewModel.relativeZoomFactor
+    val relativeZoomFactor by remember { stoneCameraViewModel::relativeZoomFactor }
     val isRecording = stoneCameraViewModel.isRecording
     val selectedMode = stoneCameraViewModel.selectedMode
     val showShutterFlash = stoneCameraViewModel.showShutterFlash
     val focusPoint = stoneCameraViewModel.focusPoint
-
-    var settingsState by remember {
-        mutableStateOf(
-            mapOf(
-                "Flash" to "Off",
-                "Delay" to "2s",
-                "Aspect Ratio" to "3:4"
-            )
-        )
-    }
+    val flashMode = stoneCameraViewModel.flashMode
+    var visibleDimensions: List<Float>? by remember { mutableStateOf(null) }
 
     // We can load cameras once (or whenever context changes) and pass them to the ViewModel
     LaunchedEffect(Unit) {
@@ -96,15 +92,50 @@ fun StoneCameraApp(
             imageCapture = imageCapture,
             videoCapture = videoCapture,
             onPreviewViewConnected = { pView, cam ->
+                var isScaling = false
                 previewView = pView
-                // Let the ViewModel know which camera is connected
+                visibleDimensions = getVisibleRange(previewView!!, imageCapture)
                 stoneCameraViewModel.onCameraConnected(cam)
 
-                // Set up tap-to-focus
+                // Set up touch gestures for focus and zoom
+                var scaleGestureDetector: ScaleGestureDetector? = null
+
                 previewView!!.setOnTouchListener { view, event ->
-                    if (event.action == android.view.MotionEvent.ACTION_DOWN) {
+                    scaleGestureDetector = scaleGestureDetector ?: ScaleGestureDetector(context,
+                        object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                            override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+                                isScaling = true
+                                return super.onScaleBegin(detector)
+                            }
+
+                            override fun onScaleEnd(detector: ScaleGestureDetector) {
+                                isScaling = false
+                                return super.onScaleEnd(detector)
+                            }
+
+                            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                                val zoomChange = detector.scaleFactor
+                                val newZoom = relativeZoomFactor * zoomChange
+                                stoneCameraViewModel.setZoom(newZoom)
+                                return true
+                            }
+                        }
+                    )
+
+                    scaleGestureDetector?.onTouchEvent(event)
+
+                    if (!isScaling && event.action == android.view.MotionEvent.ACTION_UP) {
                         val x = event.x
                         val y = event.y
+
+                        val (topOfVisible, bottomOfVisible, leftOfVisible, rightOfVisible) = visibleDimensions!!
+                        val isWithinVisible =
+                            x >= leftOfVisible && x <= rightOfVisible && y >= topOfVisible && y <= bottomOfVisible
+
+                        if (!isWithinVisible) {
+                            stoneCameraViewModel.cancelFocus("focus point outside of visible area")
+                            return@setOnTouchListener false
+                        }
 
                         // Get the metering point factory
                         val factory = previewView!!.meteringPointFactory
@@ -115,13 +146,55 @@ fun StoneCameraApp(
                         cam.cameraControl.startFocusAndMetering(focusAction)
 
                         // Update the ViewModel with the new focus point
-                        stoneCameraViewModel.setFocusPoint(pxToDp(x, context), pxToDp(y, context))
+                        stoneCameraViewModel.setFocusPoint(x, y)
                     }
                     true
                 }
+
             }
         )
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {
+                    val nextMode = when (flashMode) {
+                        "OFF" -> "ON"
+                        "ON" -> "AUTO"
+                        "AUTO" -> "OFF"
+                        else -> {
+                            "OFF"
+                        }
+                    }
+                    stoneCameraViewModel.setFlash(nextMode)
+                }
+            ) {
+                Icon(
+                    imageVector = when (flashMode) {
+                        "OFF" -> Icons.Default.FlashOff // Replace with your preferred icon
+                        "ON" -> Icons.Default.FlashOn
+                        "AUTO" -> Icons.Default.FlashAuto // You may need to add custom icons for Flash Auto
+                        else -> {
+                            Icons.Default.FlashOff
+                        }
+                    },
+                    contentDescription = when (flashMode) {
+                        "OFF" -> "Flash Off"
+                        "ON" -> "Flash On"
+                        "AUTO" -> "Flash Auto"
+                        else -> {
+                            "Flash"
+                        }
+                    },
+                    tint = Color.White // Customize as needed
+                )
+            }
+        }
 
         // Show focus reticle if set
         focusPoint?.let { (x, y) ->
@@ -129,7 +202,7 @@ fun StoneCameraApp(
                 stoneCameraViewModel.cancelFocus("focus reticle dismissed")
             }, onSetBrightness = { brightness ->
                 stoneCameraViewModel.setBrightness(brightness)
-            })
+            }, visibleDimensions = visibleDimensions!!, context = context)
         }
 
         // If showShutterFlash is true, display the overlay
@@ -235,12 +308,13 @@ fun StoneCameraApp(
                                 }.clickable {
                                     when (selectedMode) {
                                         "Photo" -> {
-                                            // Trigger the shutter flash overlay
-                                            stoneCameraViewModel.triggerShutterFlash()
                                             // Then capture the photo
                                             stoneCameraViewModel.capturePhoto(
                                                 stoneCameraViewModel.imageCapture,
                                             )
+
+                                            // Trigger the shutter flash overlay
+                                            stoneCameraViewModel.triggerShutterFlash()
                                         }
 
                                         "Video" -> {
@@ -287,10 +361,4 @@ fun StoneCameraApp(
             }
         }
     }
-}
-
-
-fun pxToDp(px: Float, context: Context): Float {
-    val density = context.resources.displayMetrics.density
-    return px / density
 }

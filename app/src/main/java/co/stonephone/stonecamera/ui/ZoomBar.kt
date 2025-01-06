@@ -36,6 +36,8 @@ fun ZoomBar(
     cameras: List<StoneCameraInfo>,
     modifier: Modifier = Modifier
 ) {
+    val currentRelativeZoom by rememberUpdatedState(newValue = relativeZoom)
+
     // We don’t store local camera or zoom factor states here.
     // The parent (ViewModel) has the source of truth.
     // Just compute ephemeral data from those inputs.
@@ -75,52 +77,54 @@ fun ZoomBar(
         lower to upper
     }
 
-    val dragModifier = Modifier
-        // Pinch gesture
-        .pointerInput(
-            relativeZoom, setZoom
-        ) {
-            detectTransformGestures { _, _, zoomChange, _ ->
-                val newZoom = (relativeZoom * zoomChange)
-                setZoom(newZoom)
-            }
-        }
-        // Drag gesture
-        .pointerInput(cameras) {
-            var draggedZoom = relativeZoom
-            val sortedCameras = cameras.sortedBy { it.relativeZoom }
-
-            detectDragGestures(
-                onDragStart = { isDragging = true },
-                onDragEnd = { isDragging = false },
-                onDragCancel = { isDragging = false },
-                onDrag = { change, dragAmount ->
-                    change.consume()
-                    val lowClosest =
-                        sortedCameras
-                            .reversed()
-                            .find { it.relativeZoom!! <= draggedZoom }
-                            ?: sortedCameras.first()
-                    val highClosest = sortedCameras.find { it.relativeZoom!! >= draggedZoom }
-                        ?: sortedCameras.last()
-                    var stopGap = (highClosest.relativeZoom!! - lowClosest.relativeZoom!!)
-                    if (stopGap == 0f) {
-                        stopGap = 5f
-                    }
-                    draggedZoom = (draggedZoom + (dragAmount.x / (500f / stopGap))).coerceIn(
-                        minRelativeZoom,
-                        maxRelativeZoom
-                    )
-                    Log.d("Zoom", "Relative Zoom: $relativeZoom, Dragged Zoom: $draggedZoom")
-                    setZoom(draggedZoom)
-                }
-            )
-        }
-
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .then(dragModifier)
+            // Pinch gesture
+            .pointerInput(
+                relativeZoom, setZoom
+            ) {
+                detectTransformGestures { _, _, zoomChange, _ ->
+                    val newZoom = (relativeZoom * zoomChange)
+                    setZoom(newZoom)
+                }
+            }
+            // Drag gesture
+            .pointerInput(cameras) {
+                val sortedCameras = cameras.sortedBy { it.relativeZoom }
+
+                detectDragGestures(
+                    onDragStart = { isDragging = true },
+                    onDragEnd = { isDragging = false },
+                    onDragCancel = { isDragging = false },
+                    onDrag = { change, dragAmount ->
+                        var draggedZoom = currentRelativeZoom
+                        change.consume()
+                        val lowClosest =
+                            sortedCameras
+                                .reversed()
+                                .find { it.relativeZoom!! <= draggedZoom }
+                                ?: sortedCameras.first()
+                        val highClosest =
+                            sortedCameras.find { it.relativeZoom!! >= draggedZoom }
+                                ?: sortedCameras.last()
+                        var stopGap = (highClosest.relativeZoom!! - lowClosest.relativeZoom!!)
+                        if (stopGap == 0f) {
+                            stopGap = 5f
+                        }
+                        draggedZoom =
+                            (draggedZoom + (dragAmount.x / (500f / stopGap))).coerceIn(
+                                minRelativeZoom,
+                                maxRelativeZoom
+                            )
+                        Log.d(
+                            "Zoom",
+                            "Relative Zoom: $relativeZoom, Dragged Zoom: $draggedZoom"
+                        )
+                        setZoom(draggedZoom)
+                    }
+                )
+            }
             .padding(bottom = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -134,7 +138,7 @@ fun ZoomBar(
                     color = Color.White.copy(alpha = 0.1f),
                     shape = CircleShape
                 )
-                .padding(8.dp, 2.dp)
+                .padding(2.dp, 2.dp)
         ) {
             zoomStops.forEach { stop ->
                 val isActiveStop = stop === lowerStop
