@@ -51,10 +51,13 @@ val shootModes = arrayOf("Photo", "Video")
 @Composable
 fun StoneCameraApp(
     cameraProvider: ProcessCameraProvider,
-    stoneCameraViewModel: StoneCameraViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val stoneCameraViewModel = viewModel<StoneCameraViewModel>(
+        factory = StoneCameraViewModelFactory(context)
+    )
 
     // Observe states from the ViewModel
     val camera = stoneCameraViewModel.camera

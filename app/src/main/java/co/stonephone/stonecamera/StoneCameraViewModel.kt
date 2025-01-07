@@ -2,6 +2,7 @@
 package co.stonephone.stonecamera
 
 import android.content.ContentValues
+import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
@@ -13,10 +14,12 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import co.stonephone.stonecamera.utils.PrefStateDelegate
 import co.stonephone.stonecamera.utils.StoneCameraInfo
 import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
 
-class StoneCameraViewModel : ViewModel() {
+class StoneCameraViewModel(context: Context) : ViewModel() {
 
     private val ZOOM_CANCEL_THRESHOLD = 0.1f
 
@@ -139,7 +142,10 @@ class StoneCameraViewModel : ViewModel() {
         val newRelativeZoom = zoomFactor.coerceIn(minRelativeZoom, maxRelativeZoom)
         relativeZoomFactor = newRelativeZoom
 
-        val (targetCamera, actualZoomRatio) = selectCameraForStepZoomLevel(newRelativeZoom, facingCameras)
+        val (targetCamera, actualZoomRatio) = selectCameraForStepZoomLevel(
+            newRelativeZoom,
+            facingCameras
+        )
         if (targetCamera.cameraId != selectedCameraId) {
             selectedCameraId = targetCamera.cameraId
         }
@@ -229,7 +235,7 @@ class StoneCameraViewModel : ViewModel() {
     //--------------------------------------------------------------------------------
     // Mutable state for Flash Mode
     //--------------------------------------------------------------------------------
-    var flashMode by mutableStateOf("OFF")
+    var flashMode by PrefStateDelegate(context, "flash_mode", "OFF")
         private set
 
     /**
@@ -250,5 +256,15 @@ class StoneCameraViewModel : ViewModel() {
 
         imageCapture.flashMode = newFlashMode
         flashMode = mode.uppercase() // Update the state
+    }
+}
+
+class StoneCameraViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(StoneCameraViewModel::class.java)) {
+            return StoneCameraViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
