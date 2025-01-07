@@ -1,21 +1,5 @@
 # The Advanced Android Camera
-We all know that camera quality is important when choosing and using a phone - 71% of people said so [https://viewpoints.xyz/polls/small-phones](in this poll). The sensor and SoC/ISP hardware is only part of the story. Incumbent manufacturers maintain their own highly advanced camera apps - this acts as a moat, making it harder for smaller companies to compete on the smartphone market, because they have to build an amazing camera app from scratch.
-
-The lack of advanced open-source camera apps limits competition in the smartphone market, and makes it harder for new smartphone manufacturers to start up. **Commercial licenses** are available to manufacturers which can include customisations and hardware-integrations.
-
-If we, the Phone Enthusiast Community, are able to build a great open-source camera app, it’ll open up the smartphone industry as a whole, and make niche phones more viable. 
-
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
 
 <!-- PROJECT SHIELDS -->
 <!--
@@ -89,9 +73,11 @@ If we, the Phone Enthusiast Community, are able to build a great open-source cam
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+We all know that camera quality is important when choosing and using a phone - 71% of people said so [https://viewpoints.xyz/polls/small-phones](in this poll). The sensor and SoC/ISP hardware is only part of the story. Incumbent manufacturers maintain their own highly advanced camera apps - this acts as a moat, making it harder for smaller companies to compete on the smartphone market, because they have to build an amazing camera app from scratch.
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+The lack of advanced open-source camera apps limits competition in the smartphone market, and makes it harder for new smartphone manufacturers to start up. **Commercial licenses** are available to manufacturers which can include customisations and hardware-integrations.
 
+If we, the Phone Enthusiast Community, are able to build a great open-source camera app, it’ll open up the smartphone industry as a whole, and make niche phones more viable. 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -100,24 +86,18 @@ If we, the Phone Enthusiast Community, are able to build a great open-source cam
 ### Built With
 
 * [![Kotlin][kotlinlang.org]][Kotlin-url]
-* Jetpack Compose
-* Tensorflow Lite
+* [https://developer.android.com/jetpack](Jetpack Compose)
+* [https://ai.google.dev/edge/litert](LiteRT) (previously known as Tensorflow Lite)
  <!-- TODO remove this (* [![Next][Next.js]][Next-url]) as soon as we get the Kotlin icon working -->
-
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+This is an Android codebase, built using Google Android development tools and SDKs, therefore Google's documentation should cover many aspect of getting started with this project.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
 * Android Development environment: Many people use [Android Studio](https://developer.android.com/studio). More experienced and/or CLI developers will find ways that work for their operating system release and needs.
 
 ### Installation
@@ -180,15 +160,15 @@ See the [open issues](https://github.com/ThePhoneProject/advanced-android-camera
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. Please use <https://gitmoji.dev/> in your commit messages, examples are available at <https://github.com/carloscuesta/gitmoji>.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+2. Create your Feature Branch (`git checkout -b your-github-username/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature and, as appropriate, tag the project issue raised for the work'`)
+4. Push to the Branch (`git push origin your-github-username/AmazingFeature`)
 5. Open a Pull Request
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -212,9 +192,9 @@ Distributed under the project_license. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Joseph Reeve - [@isnit0](https://x.com/isnit0) - email@email_client.com
+Joseph Reeve - [@isnit0](https://x.com/isnit0) 
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/ThePhoneProject/advanced-android-camera)
+Project Link: <https://github.com/ThePhoneProject/advanced-android-camera>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
