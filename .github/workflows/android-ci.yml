@@ -50,7 +50,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         tag: v${{ github.run_number }}
-        release_name: "Release ${{ github.run_number }}"
+        name: "Release ${{ github.run_number }}"
         draft: false
         prerelease: false
         artifacts: app/build/outputs/apk/debug/app-debug.apk
