@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "co.stonephone.stonecamera"
-        minSdk = 34
-        targetSdk = 34
+        minSdk = 28
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -20,13 +20,21 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         debug {
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            ndk {
+                debugSymbolLevel = "none"
+            }
         }
     }
     compileOptions {
@@ -95,10 +103,18 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "android/**/*.*"
     )
 
-    val debugTree = fileTree(mapOf("dir" to "$buildDir/tmp/kotlin-classes/debug", "excludes" to fileFilter))
+    val debugTree =
+        fileTree(mapOf("dir" to "$buildDir/tmp/kotlin-classes/debug", "excludes" to fileFilter))
     val mainSrc = "$projectDir/src/main/java"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(mapOf("dir" to "$buildDir", "includes" to listOf("jacoco/testDebugUnitTest.exec"))))
+    executionData.setFrom(
+        fileTree(
+            mapOf(
+                "dir" to "$buildDir",
+                "includes" to listOf("jacoco/testDebugUnitTest.exec")
+            )
+        )
+    )
 }
