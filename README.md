@@ -3,7 +3,7 @@ We all know that camera quality is important when choosing and using a phone - 7
 
 The lack of advanced open-source camera apps limits competition in the smartphone market, and makes it harder for new smartphone manufacturers to start up. **Commercial licenses** are available to manufacturers which can include customisations and hardware-integrations.
 
-If we, the small-phone (and wider) community, are able to build a great open-source camera app, it’ll open up the smartphone industry as a whole, and make niche phones more viable. 
+If we, the Phone Enthusiast Community, are able to build a great open-source camera app, it’ll open up the smartphone industry as a whole, and make niche phones more viable. 
 
 <!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a id="readme-top"></a>
@@ -38,7 +38,7 @@ If we, the small-phone (and wider) community, are able to build a great open-sou
 <br />
 <div align="center">
   <a href="https://github.com/ThePhoneProject/advanced-android-camera">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">The Advanced Android Camera</h3>
@@ -99,8 +99,10 @@ If we, the small-phone (and wider) community, are able to build a great open-sou
 
 ### Built With
 
-* [![Kotlin][https://kotlinlang.org/]][Kotlin-url]
-* [![Next][Next.js]][Next-url]
+* [![Kotlin][kotlinlang.org]][Kotlin-url]
+* Jetpack Compose
+* Tensorflow Lite
+ <!-- TODO remove this (* [![Next][Next.js]][Next-url]) as soon as we get the Kotlin icon working -->
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
