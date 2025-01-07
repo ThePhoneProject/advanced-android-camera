@@ -73,6 +73,8 @@ fun StoneCameraApp(
     val showShutterFlash = stoneCameraViewModel.showShutterFlash
     val focusPoint = stoneCameraViewModel.focusPoint
     val flashMode = stoneCameraViewModel.flashMode
+    val preview = stoneCameraViewModel.preview
+    val aspectRatio = stoneCameraViewModel.selectedAspectRatio
     var visibleDimensions: List<Float>? by remember { mutableStateOf(null) }
 
     // We can load cameras once (or whenever context changes) and pass them to the ViewModel
@@ -89,6 +91,8 @@ fun StoneCameraApp(
             lifecycleOwner = lifecycleOwner,
             imageCapture = imageCapture,
             videoCapture = videoCapture,
+            preview = preview,
+            stoneCameraViewModel = stoneCameraViewModel,
             onPreviewViewConnected = { pView, cam ->
                 var isScaling = false
                 previewView = pView
@@ -192,6 +196,22 @@ fun StoneCameraApp(
                     tint = Color.White // Customize as needed
                 )
             }
+
+            Text(
+                text = aspectRatio,
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(8.dp)
+                    .clickable(onClick = {
+                        val nextAspectRatio = when (aspectRatio) {
+                            "16:9" -> "4:3"
+                            "4:3" -> "FULL"
+                            else -> "16:9"
+                        }
+                        stoneCameraViewModel.setAspectRatio(nextAspectRatio)
+                    })
+            )
         }
 
         // Show focus reticle if set

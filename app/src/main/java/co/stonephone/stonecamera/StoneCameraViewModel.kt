@@ -6,7 +6,11 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import android.util.Size
 import androidx.camera.core.*
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.camera.video.Recorder
@@ -17,22 +21,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import co.stonephone.stonecamera.utils.PrefStateDelegate
 import co.stonephone.stonecamera.utils.StoneCameraInfo
+import co.stonephone.stonecamera.utils.getLargestMatchingSize
+import co.stonephone.stonecamera.utils.getLargestSensorSize
 import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
 
-class StoneCameraViewModel(context: Context) : ViewModel() {
+class StoneCameraViewModel(private val context: Context) : ViewModel() {
 
     private val ZOOM_CANCEL_THRESHOLD = 0.1f
 
-    //--------------------------------------------------------------------------------
-    // Core CameraX use-cases (built once and shared)
-    //--------------------------------------------------------------------------------
-    val imageCapture: ImageCapture = ImageCapture.Builder().build()
+    val supportedAspectRatios = listOf("4:3", "16:9", "FULL")
 
-    val recorder: Recorder = Recorder.Builder()
-        .setQualitySelector(QualitySelector.from(Quality.HD))
-        .build()
+    var selectedAspectRatio by PrefStateDelegate(context, "aspect_ratio", "16:9")
+        private set
 
-    val videoCapture: VideoCapture<Recorder> = VideoCapture.withOutput(recorder)
+    var flashMode by PrefStateDelegate(context, "flash_mode", "OFF")
+        private set
 
     //--------------------------------------------------------------------------------
     // Mutable state that drives the UI
@@ -71,6 +74,30 @@ class StoneCameraViewModel(context: Context) : ViewModel() {
     // Update whenever `facing` changes or `cameras` changes
     var facingCameras by mutableStateOf(emptyList<StoneCameraInfo>())
         private set
+
+    //--------------------------------------------------------------------------------
+    // Core CameraX use-cases (built once and shared)
+    //--------------------------------------------------------------------------------
+    var preview: Preview = createPreview(selectedAspectRatio)
+        private set
+
+    var imageCapture: ImageCapture = createImageCapture(selectedAspectRatio)
+
+    val recorder: Recorder = Recorder.Builder()
+        .setQualitySelector(QualitySelector.from(Quality.HD))
+        .build()
+
+    val videoCapture: VideoCapture<Recorder> = VideoCapture.withOutput(recorder)
+
+
+    //--------------------------------------------------------------------------------
+    // Init
+    //--------------------------------------------------------------------------------
+    init {
+        // Rebuild use-cases to match our persisted prefs
+        recreateUseCases()
+    }
+
 
     //--------------------------------------------------------------------------------
     // Public methods to manipulate the above states
@@ -232,30 +259,159 @@ class StoneCameraViewModel(context: Context) : ViewModel() {
         return ((brightnessLevel + 1.0f) / 2.0f * (maxIndex - minIndex) + minIndex).toInt()
     }
 
-    //--------------------------------------------------------------------------------
-    // Mutable state for Flash Mode
-    //--------------------------------------------------------------------------------
-    var flashMode by PrefStateDelegate(context, "flash_mode", "OFF")
-        private set
-
     /**
-     * Set the flash mode for the camera.
-     * Supported modes: ON, OFF, AUTO.
-     * @param mode A string representing the flash mode ("ON", "OFF", "AUTO").
+     * Build a ResolutionSelector that "prefers" [targetSize] if not null,
+     * otherwise tries to fallback to an aspect ratio if [ratio] is non-null,
+     * or does default if both are null.
      */
+    private fun buildResolutionSelector(
+        targetSize: Size?,     // e.g. 3000×3000 for 1:1
+        ratio: Float?          // e.g. 1.0f for 1:1, 1.333...f for 4:3, etc.
+    ): ResolutionSelector {
+        val aspectRatioConst = when {
+            ratio == null -> null // “FULL” or unknown
+            kotlin.math.abs(ratio - (4f / 3f)) < 0.01f -> AspectRatio.RATIO_4_3
+            kotlin.math.abs(ratio - (16f / 9f)) < 0.01f -> AspectRatio.RATIO_16_9
+            else -> null // e.g. 1:1 or any custom ratio
+        }
+
+        // If no targetSize is found, rely entirely on aspectRatioConst or a fallback
+        if (targetSize == null) {
+            // No recognized ratio => default to RATIO_4_3 fallback
+            return if (aspectRatioConst == null) {
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(
+                        AspectRatioStrategy(
+                            AspectRatio.RATIO_4_3,
+                            AspectRatioStrategy.FALLBACK_RULE_AUTO
+                        )
+                    )
+                    .build()
+            } else {
+                // Use the recognized built-in ratio
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(
+                        AspectRatioStrategy(
+                            aspectRatioConst,
+                            AspectRatioStrategy.FALLBACK_RULE_AUTO
+                        )
+                    )
+                    .build()
+            }
+        }
+
+        // We do have a targetSize (the largest size matching the custom ratio, or “FULL” sensor size).
+        val resolutionStrategy = ResolutionStrategy(
+            targetSize,
+            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+        )
+
+        // If ratio maps to 4:3 or 16:9, we can also supply an AspectRatioStrategy fallback
+        return if (aspectRatioConst != null) {
+            ResolutionSelector.Builder()
+                .setResolutionStrategy(resolutionStrategy)
+                .setAspectRatioStrategy(
+                    AspectRatioStrategy(
+                        aspectRatioConst,
+                        AspectRatioStrategy.FALLBACK_RULE_AUTO
+                    )
+                )
+                .build()
+        } else {
+            // ratio is something else (e.g. 1:1), so no built-in aspect ratio
+            // rely on the resolutionStrategy alone
+            ResolutionSelector.Builder()
+                .setResolutionStrategy(resolutionStrategy)
+                .build()
+        }
+    }
+
+
+    //--------------------------------------------------------------------------------
+    // Flash
+    //--------------------------------------------------------------------------------
     fun setFlash(mode: String) {
-        val newFlashMode = when (mode.uppercase()) {
+        val newFlashMode = flashModeStringToMode(mode)
+        flashMode = mode.uppercase()
+        imageCapture.flashMode = newFlashMode
+    }
+
+    private fun flashModeStringToMode(modeStr: String): Int {
+        return when (modeStr.uppercase()) {
             "ON" -> ImageCapture.FLASH_MODE_ON
             "OFF" -> ImageCapture.FLASH_MODE_OFF
             "AUTO" -> ImageCapture.FLASH_MODE_AUTO
             else -> {
-                Log.e("StoneCameraViewModel", "Invalid flash mode: $mode. Defaulting to OFF.")
+                Log.e("StoneCameraViewModel", "Invalid flash mode: $modeStr. Defaulting to OFF.")
                 ImageCapture.FLASH_MODE_OFF
             }
         }
+    }
 
-        imageCapture.flashMode = newFlashMode
-        flashMode = mode.uppercase() // Update the state
+    fun setAspectRatio(ratio: String) {
+        if (ratio !in supportedAspectRatios) return
+        selectedAspectRatio = ratio
+        recreateUseCases()
+    }
+
+    private fun recreateUseCases() {
+        preview = createPreview(selectedAspectRatio)
+        imageCapture = createImageCapture(selectedAspectRatio).also {
+            it.flashMode = flashModeStringToMode(flashMode)
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    // Building with ResolutionSelector
+    //--------------------------------------------------------------------------------
+
+    private fun parseRatioOrNull(ratioStr: String): Float? {
+        val nums = ratioStr.split(":").map { it.toFloatOrNull() }
+        if(nums.any { it == null }) return null
+        return nums[0]!! / nums[1]!!
+    }
+
+    private fun createPreview(ratioStr: String): Preview {
+        val ratioOrNull = parseRatioOrNull(ratioStr)
+        val cameraId = selectedCameraId.ifEmpty { "0" }
+
+        // 1) Figure out the best "preferred size" for this ratio
+        val targetSize = if (ratioOrNull == null) {
+            getLargestSensorSize(cameraId, context)
+        } else {
+            getLargestMatchingSize(cameraId, context, ratioOrNull)
+        }
+
+        // 2) Build a ResolutionSelector
+        val resolutionSelector = buildResolutionSelector(targetSize, ratioOrNull)
+
+        // 3) Apply to the Preview builder
+        return Preview.Builder()
+            .setResolutionSelector(resolutionSelector)
+            .build()
+            .also {
+                Log.d("StoneCameraViewModel", "Preview => ratio=$ratioStr, size=$targetSize")
+            }
+    }
+
+    private fun createImageCapture(ratioStr: String): ImageCapture {
+        val ratioOrNull = parseRatioOrNull(ratioStr)
+        val cameraId = selectedCameraId.ifEmpty { "0" }
+
+        val targetSize = if (ratioOrNull == null) {
+            getLargestSensorSize(cameraId, context)
+        } else {
+            getLargestMatchingSize(cameraId, context, ratioOrNull)
+        }
+
+        val resolutionSelector = buildResolutionSelector(targetSize, ratioOrNull)
+
+        return ImageCapture.Builder()
+            .setResolutionSelector(resolutionSelector)
+            .build()
+            .also {
+                Log.d("StoneCameraViewModel", "ImageCapture => ratio=$ratioStr, size=$targetSize")
+            }
     }
 }
 

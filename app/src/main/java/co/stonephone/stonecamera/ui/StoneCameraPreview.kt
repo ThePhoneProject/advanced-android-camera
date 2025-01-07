@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import co.stonephone.stonecamera.StoneCameraViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -35,23 +36,23 @@ fun StoneCameraPreview(
     videoCapture: VideoCapture<Recorder>,
     lifecycleOwner: LifecycleOwner,
     modifier: Modifier = Modifier,
-    onPreviewViewConnected: (PreviewView, Camera) -> Unit
+    onPreviewViewConnected: (PreviewView, Camera) -> Unit,
+    preview: Preview,
+    stoneCameraViewModel: StoneCameraViewModel
 ) {
     val context = LocalContext.current
     var previewView by remember { mutableStateOf(PreviewView(context)) }
 
     val bindingJob = remember { mutableStateOf<Job?>(null) }
 
-    LaunchedEffect(cameraProvider, selectedCameraId, imageCapture, videoCapture) {
+    LaunchedEffect(cameraProvider, selectedCameraId, imageCapture, videoCapture, preview) {
         // Cancel the ongoing binding job, if any
         bindingJob.value?.cancel()
 
         // Launch a coroutine to bind the camera
         bindingJob.value = launch(Dispatchers.Main) {
             try {
-                val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
+                preview.setSurfaceProvider(previewView.surfaceProvider)
 
                 val cameraSelector = CameraSelector.Builder()
                     .addCameraFilter { cameraInfos ->
@@ -75,7 +76,11 @@ fun StoneCameraPreview(
                     videoCapture
                 )
 
-                previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
+                if (stoneCameraViewModel.selectedAspectRatio === "FULL") {
+                    previewView.scaleType = PreviewView.ScaleType.FILL_CENTER
+                } else {
+                    previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
+                }
                 // Notify the caller that the new PreviewView is connected
                 onPreviewViewConnected(previewView, camera)
 
