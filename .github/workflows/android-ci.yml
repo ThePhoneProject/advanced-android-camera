@@ -12,6 +12,8 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
 
     steps:
     # Checkout repository
