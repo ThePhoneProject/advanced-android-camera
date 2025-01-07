@@ -54,6 +54,16 @@ jobs:
         files: ./build/reports/jacoco/jacocoTestReport.xml
         token: ${{ secrets.CODECOV_TOKEN }}
 
+    - name: Sign app APK
+      uses: ilharp/sign-android-release@nightly
+      id: sign_app
+      with:
+        releaseDir: app/build/outputs/apk/release
+        signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
+        keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        buildToolsVersion: 35.0.0
+
     # Publish APK to GitHub Releases only on main branch
     - name: Publish to GitHub Releases
       if: github.ref == 'refs/heads/main'
