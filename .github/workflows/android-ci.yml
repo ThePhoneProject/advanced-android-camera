@@ -73,5 +73,5 @@ jobs:
         name: "Release ${{ github.run_number }}"
         draft: false
         prerelease: false
-        artifacts: app/build/outputs/apk/release/app-release-unsigned.apk
+        artifacts: ${{steps.sign_app.outputs.signedFile}}
         token: ${{ secrets.GITHUB_TOKEN }}
