@@ -38,6 +38,12 @@ jobs:
     - name: Build and Run Unit Tests
       run: ./gradlew build --no-daemon
 
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./build/reports/jacoco/jacocoTestReport.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
+
     # Publish APK to GitHub Releases only on main branch
     - name: Publish to GitHub Releases
       if: github.ref == 'refs/heads/main'

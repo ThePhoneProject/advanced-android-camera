@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("jacoco")
 }
 
 android {
@@ -24,6 +25,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
         }
     }
     compileOptions {
@@ -49,6 +52,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.monitor)
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit.junit)
 
     debugImplementation(libs.androidx.ui.tooling)
@@ -70,4 +75,30 @@ dependencies {
 
     // ML Kit for Barcode/QR scanning
     implementation(libs.barcode.scanning)
+}
+
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest") // Ensure unit tests are run
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*"
+    )
+
+    val debugTree = fileTree(mapOf("dir" to "$buildDir/tmp/kotlin-classes/debug", "excludes" to fileFilter))
+    val mainSrc = "$projectDir/src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(mapOf("dir" to "$buildDir", "includes" to listOf("jacoco/testDebugUnitTest.exec"))))
 }
