@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 
 @Composable
 fun FocusReticle(
@@ -53,6 +54,7 @@ fun FocusReticle(
                 .clip(CircleShape)
                 .background(Color(0xFFFFCC00))
                 .size(20.dp)
+                .zIndex(2f)
                 .clickable { onDismissFocus() },
             contentAlignment = Alignment.Center
         ) {

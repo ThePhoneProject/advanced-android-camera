@@ -34,20 +34,15 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.core.content.ContextCompat
 import co.stonephone.stonecamera.ui.FocusReticle
 import co.stonephone.stonecamera.ui.ShutterFlashOverlay
 import co.stonephone.stonecamera.ui.StoneCameraPreview
 import co.stonephone.stonecamera.ui.ZoomBar
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
 import co.stonephone.stonecamera.utils.getVisibleRange
-import kotlinx.coroutines.delay
-import java.util.Locale
 
 val shootModes = arrayOf("Photo", "Video")
 
