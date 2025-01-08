@@ -15,6 +15,7 @@
 [![Issues][issues-shield]][issues-url]
 [![project_license][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
+[![CodeFactor](https://www.codefactor.io/repository/github/thephoneproject/advanced-android-camera/badge)](https://www.codefactor.io/repository/github/thephoneproject/advanced-android-camera)
 
 
 
