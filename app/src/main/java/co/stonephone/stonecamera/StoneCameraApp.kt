@@ -42,6 +42,8 @@ import co.stonephone.stonecamera.utils.getAllCamerasInfo
 
 val shootModes = arrayOf("Photo", "Video")
 
+// Order here is important, they are loaded and initialised in the order they are listed
+// ZoomBar depends on ZoomBase, etc.
 val PLUGINS = listOf(
     ZoomBasePlugin(),
     ZoomBarPlugin(),
