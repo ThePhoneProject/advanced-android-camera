@@ -1,14 +1,11 @@
 package co.stonephone.stonecamera.plugins
 
-import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import co.stonephone.stonecamera.StoneCameraViewModel
-import co.stonephone.stonecamera.utils.getLargestMatchingSize
-import co.stonephone.stonecamera.utils.getLargestSensorSize
 
 enum class PluginLocation {
     VIEWFINDER, TRAY, NONE

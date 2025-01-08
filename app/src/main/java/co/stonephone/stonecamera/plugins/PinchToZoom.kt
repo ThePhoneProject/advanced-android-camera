@@ -1,7 +1,6 @@
 package co.stonephone.stonecamera.plugins
 
 import android.view.ScaleGestureDetector
-import androidx.compose.runtime.remember
 import co.stonephone.stonecamera.StoneCameraViewModel
 
 class PinchToZoomPlugin : IPlugin {
