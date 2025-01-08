@@ -2,30 +2,17 @@
 package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
-import android.content.ContentValues
-import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
-import android.view.ScaleGestureDetector
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
-import androidx.camera.core.*
-import androidx.camera.core.impl.CameraInfoInternal
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.VideoCapture
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlashAuto
-import androidx.compose.material.icons.filled.FlashOff
-import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FlipCameraAndroid
-import androidx.compose.material.icons.filled.FlipCameraIos
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -113,8 +100,6 @@ fun StoneCameraApp(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-
             stoneCameraViewModel.pluginSettings.filter { it.renderLocation == SettingLocation.TOP }
                 .map { setting ->
                     RenderPluginSetting(
@@ -124,7 +109,6 @@ fun StoneCameraApp(
                     )
                 }
         }
-
 
         viewfinderPlugins.map {
             it.render(stoneCameraViewModel, it)

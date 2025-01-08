@@ -1,6 +1,5 @@
 package co.stonephone.stonecamera.plugins
 
-import android.util.Log
 import android.util.Size
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.ImageCapture

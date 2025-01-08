@@ -1,15 +1,9 @@
 package co.stonephone.stonecamera.plugins
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.MotionEvent
-import androidx.camera.core.FocusMeteringAction
-import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.FocusReticle

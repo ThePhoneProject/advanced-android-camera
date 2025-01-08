@@ -5,8 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
-import android.util.Size
 import android.view.MotionEvent
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -35,8 +33,6 @@ class StoneCameraViewModel(
     ViewModel() {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("stone_camera_prefs", Context.MODE_PRIVATE)
-
-    private val ZOOM_CANCEL_THRESHOLD = 0.1f
 
     //--------------------------------------------------------------------------------
     // Mutable state that drives the UI
@@ -68,9 +64,6 @@ class StoneCameraViewModel(
 
     // TODO: make it save between sessions
     var showShutterFlash by mutableStateOf(false)
-        private set
-
-    var focusPoint by mutableStateOf<Pair<Float, Float>?>(null)
         private set
 
     private val _plugins = mutableListOf<IPlugin>()
@@ -280,18 +273,6 @@ class StoneCameraViewModel(
 
     fun onShutterFlashComplete() {
         showShutterFlash = false
-    }
-
-    /**
-     * Setting focus point (for tap-to-focus).
-     */
-    fun cancelFocus(reason: String? = null) {
-        Log.d("StoneCameraViewModel", "Cancel focus because: $reason")
-        // Remove the reticle from UI
-        focusPoint = null
-        setBrightness(0f)
-        // Tell CameraX to cancel the focus and metering regions
-        camera?.cameraControl?.cancelFocusAndMetering()
     }
 
     fun capturePhoto(imageCapture: ImageCapture) {

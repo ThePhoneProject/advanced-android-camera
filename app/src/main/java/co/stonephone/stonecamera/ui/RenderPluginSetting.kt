@@ -1,6 +1,5 @@
 package co.stonephone.stonecamera.ui
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Slider

@@ -39,11 +39,8 @@ class ZoomBarPlugin : IPlugin {
             viewModel.camera?.let { cam ->
                 viewModel.cameraProvider?.let { provider ->
                     ZoomBar(
-                        cam,
-                        provider,
                         zoomFactor,
                         { zoomFactor -> zoomBasePlugin.setZoom(zoomFactor) },
-                        LocalContext.current,
                         cameras = facingCameras
                     )
                 }
