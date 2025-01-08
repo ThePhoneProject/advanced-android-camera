@@ -114,7 +114,7 @@ class StoneCameraViewModel(
     //--------------------------------------------------------------------------------
     init {
 
-        // Some settings affect use-cases
+        // Some settings affect use-cases, e.g. aspect ratio
         pluginSettings = registeredPlugins.flatMap { it.settings }
         registeredPlugins.forEach {
             it.settings.forEach { setting ->
@@ -330,6 +330,8 @@ class StoneCameraViewModel(
 
     private fun bindUseCases() {
         // TODO: consider a job that can be interrupted?
+
+        // These dependencies load in asynchronously, and can be destroyed & re-created at various points (e.g. rotating)
         if (previewView == null || _cameraProvider == null || lifecycleOwner == null) return;
         try {
             preview.surfaceProvider = previewView!!.surfaceProvider
