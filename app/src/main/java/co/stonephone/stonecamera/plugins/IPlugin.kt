@@ -1,15 +1,14 @@
 package co.stonephone.stonecamera.plugins
 
+import android.media.Image
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import co.stonephone.stonecamera.StoneCameraViewModel
-
-enum class PluginLocation {
-    VIEWFINDER, TRAY, NONE
-}
+import kotlinx.coroutines.CompletableDeferred
 
 // Plugin interface definition
 interface IPlugin {
@@ -19,13 +18,14 @@ interface IPlugin {
     // The name of the plugin (for UI display purposes)
     val name: String
 
-    val pluginLocation: PluginLocation?
-        get() = PluginLocation.NONE
-
     // Nullable Composable render function for the plugin
     // This function takes the ViewModel and the plugin instance as parameters and renders UI
     @Composable
-    fun render(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
+    fun renderViewfinder(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
+    }
+
+    @Composable
+    fun renderTray(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
     }
 
     // Initialization function, triggered whenever the camera or previewView changes
@@ -39,16 +39,19 @@ interface IPlugin {
         return previewView
     }
 
-    fun onImageCapture(viewModel: StoneCameraViewModel, imageCapture: ImageCapture.Builder): ImageCapture.Builder {
+    fun onImageCapture(
+        viewModel: StoneCameraViewModel,
+        imageCapture: ImageCapture.Builder
+    ): ImageCapture.Builder {
         return imageCapture
     }
 
-    fun onImageAnalysis(
+    val onImageAnalysis: ((
         viewModel: StoneCameraViewModel,
-        imageAnalysis: ImageAnalysis
-    ): ImageAnalysis {
-        return imageAnalysis
-    }
+        imageProxy: ImageProxy,
+        image: Image,
+    ) -> CompletableDeferred<Unit>)?
+        get() = null
 
     // Settings for the plugin
     val settings: List<PluginSetting>

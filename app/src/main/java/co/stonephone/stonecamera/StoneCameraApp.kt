@@ -26,10 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.stonephone.stonecamera.plugins.AspectRatioPlugin
+import co.stonephone.stonecamera.plugins.DebugPlugin
 import co.stonephone.stonecamera.plugins.FlashPlugin
 import co.stonephone.stonecamera.plugins.FocusBasePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
-import co.stonephone.stonecamera.plugins.PluginLocation
+import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
@@ -37,7 +38,6 @@ import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
 import co.stonephone.stonecamera.ui.ShutterFlashOverlay
 import co.stonephone.stonecamera.ui.StoneCameraPreview
-import co.stonephone.stonecamera.ui.ZoomBar
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
 
 val shootModes = arrayOf("Photo", "Video")
@@ -45,6 +45,7 @@ val shootModes = arrayOf("Photo", "Video")
 // Order here is important, they are loaded and initialised in the order they are listed
 // ZoomBar depends on ZoomBase, etc.
 val PLUGINS = listOf(
+    QRScannerPlugin(),
     ZoomBasePlugin(),
     ZoomBarPlugin(),
     FocusBasePlugin(),
@@ -52,6 +53,7 @@ val PLUGINS = listOf(
     PinchToZoomPlugin(),
     FlashPlugin(),
     AspectRatioPlugin(),
+//    DebugPlugin()
 )
 
 @OptIn(ExperimentalCamera2Interop::class)
@@ -73,17 +75,12 @@ fun StoneCameraApp(
 
     val plugins by remember { stoneCameraViewModel::plugins }
 
-    val viewfinderPlugins =
-        plugins.filter { it.pluginLocation == PluginLocation.VIEWFINDER }
-    val trayPlugins =
-        plugins.filter { it.pluginLocation == PluginLocation.TRAY }
-
     LaunchedEffect(cameraProvider, lifecycleOwner) {
         stoneCameraViewModel.onCameraProvider(cameraProvider)
         stoneCameraViewModel.onLifecycleOwner(lifecycleOwner)
     }
 
-    // We can load cameras once (or whenever context changes) and pass them to the ViewModel
+// We can load cameras once (or whenever context changes) and pass them to the ViewModel
     LaunchedEffect(Unit) {
         val allCameras = getAllCamerasInfo(context)
         stoneCameraViewModel.loadCameras(allCameras)
@@ -112,9 +109,10 @@ fun StoneCameraApp(
                 }
         }
 
-        viewfinderPlugins.map {
-            it.render(stoneCameraViewModel, it)
+        plugins.map {
+            it.renderViewfinder(stoneCameraViewModel, it)
         }
+
 
         // If showShutterFlash is true, display the overlay
         if (showShutterFlash) {
@@ -130,8 +128,8 @@ fun StoneCameraApp(
                 .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            trayPlugins.map {
-                it.render(stoneCameraViewModel, it)
+            plugins.map {
+                it.renderTray(stoneCameraViewModel, it)
             }
 
             // Translucent overlay for mode switch & shutter

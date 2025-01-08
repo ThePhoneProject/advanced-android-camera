@@ -14,12 +14,8 @@ class ZoomBarPlugin : IPlugin {
     override val id: String = "zoomBarPlugin"
     override val name: String = "Zoom Bar"
 
-
-    override val pluginLocation: PluginLocation?
-        get() = PluginLocation.TRAY
-
     @Composable
-    override fun render(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
+    override fun renderTray(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
         val zoomBasePlugin =
             remember(viewModel.plugins) { viewModel.plugins.find { it.id == "zoomBasePlugin" } as ZoomBasePlugin? }
 

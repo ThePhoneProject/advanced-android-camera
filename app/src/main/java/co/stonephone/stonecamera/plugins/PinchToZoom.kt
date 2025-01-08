@@ -1,6 +1,7 @@
 package co.stonephone.stonecamera.plugins
 
 import android.view.ScaleGestureDetector
+import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
 
 class PinchToZoomPlugin : IPlugin {
@@ -19,7 +20,7 @@ class PinchToZoomPlugin : IPlugin {
         }
 
         scaleGestureDetector = ScaleGestureDetector(
-            viewModel.context,
+            MyApplication.getAppContext(),
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                     isScaling = true

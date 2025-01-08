@@ -5,7 +5,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Log
 import android.view.MotionEvent
+import androidx.annotation.OptIn
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
@@ -24,15 +26,25 @@ import co.stonephone.stonecamera.plugins.PluginSetting
 import co.stonephone.stonecamera.utils.StoneCameraInfo
 import co.stonephone.stonecamera.utils.createCameraSelectorForId
 import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 @Suppress("UNCHECKED_CAST")
 class StoneCameraViewModel(
-    val context: Context,
+    context: Context,
     private val registeredPlugins: List<IPlugin>
 ) :
     ViewModel() {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("stone_camera_prefs", Context.MODE_PRIVATE)
+
+    private val cameraExecutor = Executors.newSingleThreadExecutor()
+
 
     //--------------------------------------------------------------------------------
     // Mutable state that drives the UI
@@ -51,9 +63,6 @@ class StoneCameraViewModel(
     private var _selectedCameraId = "0"
 
     var facing by mutableStateOf(CameraSelector.LENS_FACING_BACK)
-        private set
-
-    var relativeZoomFactor by mutableStateOf(1f)
         private set
 
     var isRecording by mutableStateOf(false)
@@ -102,6 +111,8 @@ class StoneCameraViewModel(
 
     var imageCapture: ImageCapture = createImageCapture()
 
+    var imageAnalysis: ImageAnalysis = createImageAnalysis()
+
     val recorder: Recorder = Recorder.Builder()
         .setQualitySelector(QualitySelector.from(Quality.HD))
         .build()
@@ -142,11 +153,7 @@ class StoneCameraViewModel(
     }
 
     fun onPreviewView(view: PreviewView) {
-        val _view = plugins.fold(view) { v, plugin ->
-            plugin.onPreviewView(this, v)
-        }
-
-        _previewView = _view
+        _previewView = view
         bindUseCases()
     }
 
@@ -341,16 +348,20 @@ class StoneCameraViewModel(
             previewViewTouchHandlers.clear()
             _cameraProvider!!.unbindAll()
 
-
             camera = _cameraProvider!!.bindToLifecycle(
                 lifecycleOwner!!,
                 cameraSelector,
                 preview,
                 imageCapture,
-                videoCapture
+                videoCapture,
+                imageAnalysis,
             )
 
             initializePlugins()
+
+            _previewView = plugins.fold(previewView!!) { v, plugin ->
+                plugin.onPreviewView(this, v)
+            }
         } catch (e: Exception) {
             // Handle binding errors
             e.printStackTrace()
@@ -361,6 +372,7 @@ class StoneCameraViewModel(
     fun recreateUseCases() {
         preview = createPreview()
         imageCapture = createImageCapture()
+        imageAnalysis = createImageAnalysis()
         // TODO: videoCapture
 
         this.bindUseCases()
@@ -378,6 +390,43 @@ class StoneCameraViewModel(
         }.build()
     }
 
+    @OptIn(ExperimentalGetImage::class)
+    fun createImageAnalysis(): ImageAnalysis {
+        val analysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_BLOCK_PRODUCER)
+            .build()
+            .also {
+                it.setAnalyzer(cameraExecutor, ImageAnalysis.Analyzer { imageProxy ->
+                    val inputImage = imageProxy.image ?: return@Analyzer
+
+                    // Create a list to store the work objects
+                    val workList = mutableListOf<CompletableDeferred<Unit>>()
+
+                    val analysisPlugins = plugins.filter { it.onImageAnalysis != null }
+                    // Dispatch work to each plugin
+                    for (plugin in analysisPlugins) {
+                        val work = plugin.onImageAnalysis!!(this, imageProxy, inputImage)
+                        workList.add(work)
+                    }
+
+                    // Use coroutines to run the plugins in parallel and wait for all to complete
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            // Await all work to finish
+                            workList.awaitAll()
+                            Log.d("Analyzer", "All plugins completed successfully")
+                        } catch (e: Exception) {
+                            Log.e("Analyzer", "Error in one or more plugins", e)
+                        } finally {
+                            // Close the ImageProxy after all plugins are done
+                            imageProxy.close()
+                        }
+                    }
+                })
+            }
+
+        return analysis;
+    }
 }
 
 class StoneCameraViewModelFactory(
