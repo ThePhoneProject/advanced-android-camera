@@ -6,9 +6,18 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.util.Log
 import android.util.Size
+import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.Camera
 import kotlin.math.abs
 
-fun getLargestSensorSize(cameraId: String, context: Context): Size? {
+@OptIn(ExperimentalCamera2Interop::class)
+fun getLargestSensorSize(camera: Camera, context: Context): Size? {
+    // Access Camera2CameraInfo from the CameraX camera
+    val camera2CameraInfo = Camera2CameraInfo.from(camera.cameraInfo)
+    val cameraId = camera2CameraInfo.cameraId // Retrieve the Camera ID
+
     val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     val chars = manager.getCameraCharacteristics(cameraId)
     val config = chars.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP) ?: return null
@@ -16,11 +25,16 @@ fun getLargestSensorSize(cameraId: String, context: Context): Size? {
     return sizes.maxByOrNull { it.width.toLong() * it.height.toLong() }
 }
 
+@OptIn(ExperimentalCamera2Interop::class)
 fun getLargestMatchingSize(
-    cameraId: String,
+    camera: Camera,
     context: Context,
     requestedRatio: Float
 ): Size? {
+    // Access Camera2CameraInfo from the CameraX camera
+    val camera2CameraInfo = Camera2CameraInfo.from(camera.cameraInfo)
+    val cameraId = camera2CameraInfo.cameraId // Retrieve the Camera ID
+
     val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     val chars = manager.getCameraCharacteristics(cameraId)
     val config = chars.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP) ?: return null
