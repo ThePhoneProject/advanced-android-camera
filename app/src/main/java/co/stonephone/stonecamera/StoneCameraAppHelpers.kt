@@ -9,7 +9,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.video.*
 import androidx.core.content.ContextCompat
-import co.stonephone.stonecamera.MyApplication.Companion.appContext
 
 object StoneCameraAppHelpers {
 
@@ -30,14 +29,14 @@ object StoneCameraAppHelpers {
             put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/StoneCameraApp")
         }
         val outputOptions = ImageCapture.OutputFileOptions.Builder(
-            appContext.contentResolver,
+            MyApplication.getAppContext().contentResolver,
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             contentValues
         ).build()
 
         imageCapture.takePicture(
             outputOptions,
-            ContextCompat.getMainExecutor(appContext),
+            ContextCompat.getMainExecutor(MyApplication.getAppContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = outputFileResults.savedUri
@@ -65,15 +64,15 @@ object StoneCameraAppHelpers {
         }
 
         val outputOptions = MediaStoreOutputOptions.Builder(
-            appContext.contentResolver,
+            MyApplication.getAppContext().contentResolver,
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         ).setContentValues(contentValues)
             .build()
 
         return videoCapture.output
-            .prepareRecording(appContext, outputOptions)
+            .prepareRecording(MyApplication.getAppContext(), outputOptions)
             .withAudioEnabled()
-            .start(ContextCompat.getMainExecutor(appContext)) { recordEvent ->
+            .start(ContextCompat.getMainExecutor(MyApplication.getAppContext())) { recordEvent ->
                 when (recordEvent) {
                     is VideoRecordEvent.Start -> {
                         Log.d(TAG, "Video recording started")

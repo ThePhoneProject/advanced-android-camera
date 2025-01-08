@@ -1,6 +1,7 @@
 package co.stonephone.stonecamera.ui
 
 import android.content.Context
+import android.graphics.Rect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,17 +24,16 @@ fun FocusReticle(
     initialBrightness: Float = 0f,
     onDismissFocus: () -> Unit,
     onSetBrightness: (Float) -> Unit,
-    visibleDimensions: List<Float>,
+    visibleDimensions: Rect,
     context: Context
 ) {
     var brightness by remember { mutableStateOf(initialBrightness) }
     val focusReticleSize = 70
     val reticleHalf = focusReticleSize / 2
-    val (topOfVisible, bottomOfVisible, leftOfVisible, rightOfVisible) = visibleDimensions
-    val minY = topOfVisible + 10
-    val maxY = bottomOfVisible - (focusReticleSize * 2 + 10)
-    val minX = leftOfVisible + 10
-    val maxX = rightOfVisible - (focusReticleSize * 2 + 10)
+    val minY = visibleDimensions!!.top + 10f
+    val maxY = visibleDimensions!!.bottom - (focusReticleSize * 2f + 10)
+    val minX = visibleDimensions!!.left + 10f
+    val maxX = visibleDimensions!!.right - (focusReticleSize * 2f + 10)
 
     Box(
         modifier = Modifier
