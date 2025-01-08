@@ -225,7 +225,7 @@ Project Link: <https://github.com/ThePhoneProject/advanced-android-camera>
 [issues-shield]: https://img.shields.io/github/issues/ThePhoneProject/advanced-android-camera.svg?style=for-the-badge
 [issues-url]: https://github.com/ThePhoneProject/advanced-android-camera/issues
 [license-shield]: https://img.shields.io/github/license/gThePhoneProject/advanced-android-camera.svg?style=for-the-badge
-[license-url]: https://github.com/ThePhoneProject/advanced-android-camera/blob/main/LICENSE.txt
+[license-url]: https://github.com/ThePhoneProject/advanced-android-camera/blob/main/LICENSE.md
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://uk.linkedin.com/in/josephereeve
 [product-screenshot]: images/screenshot.png
