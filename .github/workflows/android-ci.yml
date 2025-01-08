@@ -70,8 +70,8 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         tag: v${{ github.run_number }}
-        name: "Release ${{ github.run_number }}"
-        draft: false
-        prerelease: false
+        name: "Nightly ${{ github.run_number }}"
+        draft: true
+        prerelease: true
         artifacts: ${{steps.sign_app.outputs.signedFile}}
         token: ${{ secrets.GITHUB_TOKEN }}
