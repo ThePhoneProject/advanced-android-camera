@@ -73,7 +73,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-We all know that camera quality is important when choosing and using a phone - 71% of people said so [https://viewpoints.xyz/polls/small-phones](in this poll). The sensor and SoC/ISP hardware is only part of the story. Incumbent manufacturers maintain their own highly advanced camera apps - this acts as a moat, making it harder for smaller companies to compete on the smartphone market, because they have to build an amazing camera app from scratch.
+We all know that camera quality is important when choosing and using a phone - 71% of people said so [in this poll](https://viewpoints.xyz/polls/small-phones). The sensor and SoC/ISP hardware is only part of the story. Incumbent manufacturers maintain their own highly advanced camera apps - this acts as a moat, making it harder for smaller companies to compete on the smartphone market, because they have to build an amazing camera app from scratch.
 
 The lack of advanced open-source camera apps limits competition in the smartphone market, and makes it harder for new smartphone manufacturers to start up. **Commercial licenses** are available to manufacturers which can include customisations and hardware-integrations.
 
@@ -135,21 +135,24 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 ## Roadmap
 ### V0 Features ###
 - [ ] Modes
-    - [ ] Photo   
+    - [x] Photo   
         - [ ] Press and hold to record video
-    - [ ] Video
-- [ ] Auto Focus
-    - [ ] General
-    - [ ] with Touch to Focus Override
-- [ ] Zoom
-    - [ ] Preset buttons
-    - [ ] Slide between
-    - [ ] Pinch
-    - [ ] Auto-Switch between cameras
-- [ ] ⁠Auto Exposure
-- [ ] ⁠Front/Rear Camera Selection
-- [ ] ⁠Flash On/Off/Auto
-- [ ] [Added] Aspect Ratio selection
+    - [x] Video
+- [x] Auto Focus
+    - [x] General
+    - [x] with Touch to Focus Override
+- [x] Zoom
+    - [x] Preset buttons
+    - [x] Slide between
+    - [x] Pinch
+    - [x] Auto-Switch between cameras
+- [x] ⁠Auto Exposure
+- [x] ⁠Front/Rear Camera Selection
+- [x] ⁠Flash On/Off/Auto
+- [x] [Added] Aspect Ratio selection
+- [ ] [Added] QR Code Scanning
+- [ ] [Added] Basic Settings Drawer
+
 
 See the [open issues](https://github.com/ThePhoneProject/advanced-android-camera/issues) for a full list of proposed features (and known issues).
 
@@ -162,7 +165,7 @@ See the [open issues](https://github.com/ThePhoneProject/advanced-android-camera
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. Please use <https://gitmoji.dev/> in your commit messages, examples are available at <https://github.com/carloscuesta/gitmoji>.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request using your github username as the first part of the name of your branch. You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
