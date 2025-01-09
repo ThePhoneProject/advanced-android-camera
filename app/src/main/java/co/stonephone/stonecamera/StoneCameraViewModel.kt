@@ -71,7 +71,7 @@ class StoneCameraViewModel(
     var selectedMode by mutableStateOf("Photo")
         private set
 
-    // TODO: make it save between sessions
+    // TODO make it save between sessions
     var showShutterFlash by mutableStateOf(false)
         private set
 
@@ -336,36 +336,38 @@ class StoneCameraViewModel(
 
 
     private fun bindUseCases() {
-        // TODO: consider a job that can be interrupted?
+        // TODO consider a job that can be interrupted?
 
         // These dependencies load in asynchronously, and can be destroyed & re-created at various points (e.g. rotating)
-        if (previewView == null || _cameraProvider == null || lifecycleOwner == null) return;
-        try {
-            preview.surfaceProvider = previewView!!.surfaceProvider
+        if (previewView == null || _cameraProvider == null || lifecycleOwner == null) return
+        else {
+            try {
+                preview.surfaceProvider = previewView!!.surfaceProvider
 
-            val cameraSelector = createCameraSelectorForId(_selectedCameraId)
+                val cameraSelector = createCameraSelectorForId(_selectedCameraId)
 
-            previewViewTouchHandlers.clear()
-            _cameraProvider!!.unbindAll()
+                previewViewTouchHandlers.clear()
+                _cameraProvider!!.unbindAll()
 
-            camera = _cameraProvider!!.bindToLifecycle(
-                lifecycleOwner!!,
-                cameraSelector,
-                preview,
-                imageCapture,
-                videoCapture,
-                imageAnalysis,
-            )
+                camera = _cameraProvider!!.bindToLifecycle(
+                    lifecycleOwner!!,
+                    cameraSelector,
+                    preview,
+                    imageCapture,
+                    videoCapture,
+                    imageAnalysis,
+                )
 
-            initializePlugins()
+                initializePlugins()
 
-            _previewView = plugins.fold(previewView!!) { v, plugin ->
-                plugin.onPreviewView(this, v)
+                _previewView = plugins.fold(previewView!!) { v, plugin ->
+                    plugin.onPreviewView(this, v)
+                }
+            } catch (e: Exception) {
+                // Handle binding errors
+                e.printStackTrace()
+
             }
-        } catch (e: Exception) {
-            // Handle binding errors
-            e.printStackTrace()
-
         }
     }
 
@@ -373,7 +375,7 @@ class StoneCameraViewModel(
         preview = createPreview()
         imageCapture = createImageCapture()
         imageAnalysis = createImageAnalysis()
-        // TODO: videoCapture
+        // TODO videoCapture
 
         this.bindUseCases()
     }

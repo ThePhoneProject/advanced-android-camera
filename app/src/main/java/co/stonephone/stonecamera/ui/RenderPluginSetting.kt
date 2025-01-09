@@ -13,7 +13,7 @@ fun RenderPluginSetting(
     setting: PluginSetting,
     viewModel: StoneCameraViewModel,
     modifier: Modifier = Modifier
-    // TODO: modes (e.g. compact: toggle in place, row: inform parent to hide others when active, full-row: always open)
+    // TODO modes (e.g. compact: toggle in place, row: inform parent to hide others when active, full-row: always open)
 ) {
     val value = viewModel.getSetting(setting.key) ?: setting.defaultValue
     when (setting) {

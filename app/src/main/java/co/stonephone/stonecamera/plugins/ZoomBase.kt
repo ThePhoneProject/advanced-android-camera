@@ -22,34 +22,37 @@ class ZoomBasePlugin : IPlugin {
     }
 
     fun setZoom(zoomFactor: Float) {
-        if (viewModel == null) return;
-        val cameras = viewModel!!.cameras
-        val facingCameras =
-            cameras.filter { it.lensFacing == viewModel!!.camera?.cameraInfo?.lensFacing }
-        val camera = viewModel!!.camera
+        if (viewModel == null) return
+        else {
+            val cameras = viewModel!!.cameras
+            val facingCameras =
+                cameras.filter { it.lensFacing == viewModel!!.camera?.cameraInfo?.lensFacing }
+            val camera = viewModel!!.camera
 
 
-        // If difference in zoom is above threshold, we auto-cancel focus
+            // If difference in zoom is above threshold, we auto-cancel focus
 //        if (kotlin.math.abs(zoomFactor - oldZoom) > ZOOM_CANCEL_THRESHOLD) {
 //            cancelFocus("zoom changed by more than $ZOOM_CANCEL_THRESHOLD")
 //        }
 
-        val maxCamera = cameras.maxByOrNull { it.relativeZoom ?: 1f } ?: return
-        val maxRelativeZoom = (maxCamera.relativeZoom ?: 1f) * maxCamera.maxZoom
-        val minRelativeZoom = cameras.minByOrNull { it.relativeZoom ?: 1f }?.relativeZoom ?: 1.0f
+            val maxCamera = cameras.maxByOrNull { it.relativeZoom ?: 1f } ?: return
+            val maxRelativeZoom = (maxCamera.relativeZoom ?: 1f) * maxCamera.maxZoom
+            val minRelativeZoom =
+                cameras.minByOrNull { it.relativeZoom ?: 1f }?.relativeZoom ?: 1.0f
 
-        val newRelativeZoom = zoomFactor.coerceIn(minRelativeZoom, maxRelativeZoom)
-        currentZoom = newRelativeZoom
+            val newRelativeZoom = zoomFactor.coerceIn(minRelativeZoom, maxRelativeZoom)
+            currentZoom = newRelativeZoom
 
-        val (targetCamera, actualZoomRatio) = selectCameraForStepZoomLevel(
-            newRelativeZoom,
-            facingCameras
-        )
+            val (targetCamera, actualZoomRatio) = selectCameraForStepZoomLevel(
+                newRelativeZoom,
+                facingCameras
+            )
 
-        viewModel!!.setSelectedCamera(targetCamera.cameraId)
+            viewModel!!.setSelectedCamera(targetCamera.cameraId)
 
 
-        camera?.cameraControl?.setZoomRatio(actualZoomRatio)
+            camera?.cameraControl?.setZoomRatio(actualZoomRatio)
+        }
     }
 
     override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet

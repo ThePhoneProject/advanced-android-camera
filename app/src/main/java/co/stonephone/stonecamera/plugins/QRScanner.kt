@@ -65,7 +65,7 @@ class QRScannerPlugin : IPlugin {
     var width = 0f
 
 
-    // TODO: RenderViewfinder to show the box around the QR code - I spent 6hrs on it and couldn't get it to line up
+    // TODO RenderViewfinder to show the box around the QR code - I spent 6hrs on it and couldn't get it to line up
 
     @Composable
     override fun renderTray(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
@@ -133,7 +133,7 @@ class QRScannerPlugin : IPlugin {
 
     @SuppressLint("RestrictedApi")
     @OptIn(ExperimentalGetImage::class)
-    override val onImageAnalysis = { viewModel: StoneCameraViewModel,
+        override val onImageAnalysis = { viewModel: StoneCameraViewModel,
                                      imageProxy: ImageProxy,
                                      image: Image
         ->
