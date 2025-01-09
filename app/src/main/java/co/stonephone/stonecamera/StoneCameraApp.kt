@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.stonephone.stonecamera.plugins.AspectRatioPlugin
+import co.stonephone.stonecamera.plugins.CaptureUtilsPlugin
 import co.stonephone.stonecamera.plugins.DebugPlugin
 import co.stonephone.stonecamera.plugins.FlashPlugin
 import co.stonephone.stonecamera.plugins.FocusBasePlugin
@@ -55,6 +56,7 @@ val PLUGINS = listOf(
     PinchToZoomPlugin(),
     FlashPlugin(),
     AspectRatioPlugin(),
+    CaptureUtilsPlugin(),
 //    DebugPlugin()
 )
 
@@ -231,9 +233,6 @@ fun StoneCameraApp(
                                             stoneCameraViewModel.capturePhoto(
                                                 stoneCameraViewModel.imageCapture,
                                             )
-
-                                            // Trigger the shutter flash overlay
-                                            stoneCameraViewModel.triggerShutterFlash()
                                         }
 
                                         "Video" -> {
