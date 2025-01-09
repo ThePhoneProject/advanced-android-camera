@@ -46,7 +46,7 @@ class FocusBasePlugin : IPlugin {
         val meteringPoint = factory.createPoint(_x, _y)
 
         val focusAction = FocusMeteringAction.Builder(meteringPoint).build()
-        // TODO: I think this should keep going every few seconds to keep re-focusing on the area
+        // TODO I think this should keep going every few seconds to keep re-focusing on the area
         viewModel!!.camera?.cameraControl?.startFocusAndMetering(focusAction)
     }
 

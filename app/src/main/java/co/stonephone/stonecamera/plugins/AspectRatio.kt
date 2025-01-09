@@ -40,7 +40,7 @@ class AspectRatioPlugin : IPlugin {
         viewModel: StoneCameraViewModel,
         imageCapture: ImageCapture.Builder
     ): ImageCapture.Builder {
-        // TODO: "FULL" aspect ratio isn't cropping on image capture
+        // TODO "FULL" aspect ratio isn't cropping on image capture
         val ratioStr = viewModel.getSetting<String>("aspectRatio") ?: "16:9"
         val context = MyApplication.getAppContext()
 
