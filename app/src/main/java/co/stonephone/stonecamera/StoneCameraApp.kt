@@ -2,6 +2,7 @@
 package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
+import android.graphics.Rect
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -38,6 +39,7 @@ import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
 import co.stonephone.stonecamera.ui.ShutterFlashOverlay
 import co.stonephone.stonecamera.ui.StoneCameraPreview
+import co.stonephone.stonecamera.utils.calculateImageCoverageRegion
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
 
 val shootModes = arrayOf("Photo", "Video")
@@ -74,10 +76,22 @@ fun StoneCameraApp(
     val showShutterFlash = stoneCameraViewModel.showShutterFlash
 
     val plugins by remember { stoneCameraViewModel::plugins }
+    val previewView = stoneCameraViewModel.previewView
+    val imageCapture = stoneCameraViewModel.imageCapture
+
+    var viewfinderDimensions by remember { mutableStateOf<Rect?>(null) }
 
     LaunchedEffect(cameraProvider, lifecycleOwner) {
         stoneCameraViewModel.onCameraProvider(cameraProvider)
         stoneCameraViewModel.onLifecycleOwner(lifecycleOwner)
+    }
+
+    LaunchedEffect(previewView, imageCapture) {
+        if (previewView != null && imageCapture != null) {
+            viewfinderDimensions = calculateImageCoverageRegion(
+                previewView!!, imageCapture
+            )
+        }
     }
 
 // We can load cameras once (or whenever context changes) and pass them to the ViewModel
@@ -102,15 +116,22 @@ fun StoneCameraApp(
             stoneCameraViewModel.pluginSettings.filter { it.renderLocation == SettingLocation.TOP }
                 .map { setting ->
                     RenderPluginSetting(
-                        setting,
-                        stoneCameraViewModel,
-                        modifier = Modifier.padding(4.dp)
+                        setting, stoneCameraViewModel, modifier = Modifier.padding(4.dp)
                     )
                 }
         }
 
-        plugins.map {
-            it.renderViewfinder(stoneCameraViewModel, it)
+        viewfinderDimensions?.let {
+            Box(
+                modifier = Modifier
+                    .width(it.width().dp)
+                    .height(it.height().dp)
+                    .offset(x = it.left.toFloat().dp, y = it.top.toFloat().dp)
+            ) {
+                plugins.map {
+                    it.renderViewfinder(stoneCameraViewModel, it)
+                }
+            }
         }
 
 
@@ -137,8 +158,7 @@ fun StoneCameraApp(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Black.copy(alpha = 0.5f))
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomCenter
+                    .padding(16.dp), contentAlignment = Alignment.BottomCenter
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -152,15 +172,13 @@ fun StoneCameraApp(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         shootModes.forEach { mode ->
-                            Text(
-                                text = mode.uppercase(),
+                            Text(text = mode.uppercase(),
                                 color = if (mode == selectedMode) Color(0xFFFFCC00) else Color.White,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
                                     stoneCameraViewModel.selectMode(mode)
-                                }
-                            )
+                                })
                         }
                     }
 
@@ -177,8 +195,7 @@ fun StoneCameraApp(
                                 .background(Color.Transparent, shape = CircleShape)
                                 .clickable {
                                     stoneCameraViewModel.toggleCameraFacing()
-                                },
-                            contentAlignment = Alignment.Center
+                                }, contentAlignment = Alignment.Center
                         ) {
 
                         }
@@ -225,8 +242,7 @@ fun StoneCameraApp(
                                                     stoneCameraViewModel.videoCapture
                                                 ) { uri ->
                                                     Log.d(
-                                                        "StoneCameraApp",
-                                                        "Video saved to: $uri"
+                                                        "StoneCameraApp", "Video saved to: $uri"
                                                     )
                                                 }
                                             } else {
@@ -236,10 +252,8 @@ fun StoneCameraApp(
                                         }
                                     }
 
-                                },
-                                contentAlignment = Alignment.Center
-                            ) {
-                            }
+                                }, contentAlignment = Alignment.Center
+                            ) {}
                         }
 
                         // Camera Switcher Button

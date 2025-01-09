@@ -1,7 +1,6 @@
 package co.stonephone.stonecamera.ui
 
 import android.content.Context
-import android.graphics.Rect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,34 +12,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 
 @Composable
 fun FocusReticle(
-    x: Float,
-    y: Float,
+    xDp: Dp,
+    yDp: Dp,
     initialBrightness: Float = 0f,
     onDismissFocus: () -> Unit,
     onSetBrightness: (Float) -> Unit,
-    visibleDimensions: Rect,
     context: Context
 ) {
     var brightness by remember { mutableStateOf(initialBrightness) }
     val focusReticleSize = 70
-    val reticleHalf = focusReticleSize / 2
-    val minY = visibleDimensions!!.top + 10f
-    val maxY = visibleDimensions!!.bottom - (focusReticleSize * 2f + 10)
-    val minX = visibleDimensions!!.left + 10f
-    val maxX = visibleDimensions!!.right - (focusReticleSize * 2f + 10)
+    val reticleHalf = pxToDp(focusReticleSize / 2f, context).dp
 
     Box(
         modifier = Modifier
-//            .offset(x.dp - reticleHalf.dp, y.dp - reticleHalf.dp)
             .offset(
-                pxToDp(maxOf(minOf(x, maxX), minX) - reticleHalf, context).dp,
-                pxToDp(maxOf(minOf(y, maxY), minY) - reticleHalf, context).dp
+                xDp - reticleHalf,
+                yDp - reticleHalf
             )
             .size(focusReticleSize.dp)
             .background(Color.Transparent)

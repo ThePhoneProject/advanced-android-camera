@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- If you need to write to external storage on older devices -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- For video with audio (if you implement audio recording) -->

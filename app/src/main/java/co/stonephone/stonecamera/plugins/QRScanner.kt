@@ -5,24 +5,22 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.graphics.RectF
 import android.media.Image
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
-import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -55,7 +53,9 @@ class QRScannerPlugin : IPlugin {
     var scanner: BarcodeScanner? = null
     var value by mutableStateOf<String?>(null)
     var barcodePos by mutableStateOf<RectF?>(null)
-    var visibleDimensions: Rect? = null
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var clearValueRunnable: Runnable? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun initialize(viewModel: StoneCameraViewModel) {
@@ -65,33 +65,7 @@ class QRScannerPlugin : IPlugin {
     var width = 0f
 
 
-    // FIX :cry:
-    @Composable
-    override fun renderViewfinder(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
-        val barcodePos by remember { this::barcodePos }
-
-        if (barcodePos !== null) {
-            val width = barcodePos!!.width()
-            val height = barcodePos!!.height()
-            val leftPos = barcodePos!!.left
-            val topPos = barcodePos!!.top
-
-            val xOffset = (leftPos + visibleDimensions!!.left).dp
-            val yOffset = (topPos + visibleDimensions!!.top).dp
-            return Box(
-                modifier = Modifier
-                    .width(width.dp)
-                    .height(height.dp)
-                    .offset(
-                        x = xOffset,
-                        y = yOffset
-                    )
-                    .border(2.dp, Color(0xFFFFCC00))
-            )
-
-
-        }
-    }
+    // TODO: RenderViewfinder to show the box around the QR code - I spent 6hrs on it and couldn't get it to line up
 
     @Composable
     override fun renderTray(viewModel: StoneCameraViewModel, pluginInstance: IPlugin) {
@@ -157,6 +131,7 @@ class QRScannerPlugin : IPlugin {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     @OptIn(ExperimentalGetImage::class)
     override val onImageAnalysis = { viewModel: StoneCameraViewModel,
                                      imageProxy: ImageProxy,
@@ -170,27 +145,33 @@ class QRScannerPlugin : IPlugin {
         scanner?.process(inputImage)
             ?.addOnSuccessListener { barcodes ->
                 if (barcodes.size > 0) {
-                    val imageSize = Size(inputImage.width, inputImage.height)
+                    val prevBarcode = value
                     val barcode = barcodes[0]
                     value = barcode.rawValue
 
-                    if (barcode.boundingBox != null) {
-//                        barcodePos = RectF(
-//                            barcode.boundingBox!!.left.toFloat(),
-//                            barcode.boundingBox!!.top.toFloat(),
-//                            barcode.boundingBox!!.right.toFloat(),
-//                            barcode.boundingBox!!.bottom.toFloat()
-//                        )
-
-//                        visibleDimensions =
-//                            calculateImageCoverageRegion(
-//                                viewModel.previewView!!,
-//                                viewModel.imageCapture
-//                            )
+                    if (value !== prevBarcode) {
+                        // Trigger haptic feedback
+                        val vibrator = MyApplication.getAppContext()
+                            .getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                        vibrator.vibrate(
+                            VibrationEffect.createOneShot(
+                                100,
+                                VibrationEffect.DEFAULT_AMPLITUDE
+                            )
+                        )
                     }
+
+                    // Cancel any pending clear
+                    clearValueRunnable?.let { handler.removeCallbacks(it) }
                 } else {
-                    value = null
-                    barcodePos = null
+                    if (value !== null && clearValueRunnable == null) {
+                        clearValueRunnable = Runnable {
+                            value = null
+                            barcodePos = null
+                            clearValueRunnable = null
+                        }
+                        handler.postDelayed(clearValueRunnable!!, 5000)
+                    }
                 }
                 deferred.complete(Unit)
             }

@@ -109,9 +109,9 @@ class StoneCameraViewModel(
     //--------------------------------------------------------------------------------
     var preview: Preview = createPreview()
 
-    var imageCapture: ImageCapture = createImageCapture()
+    var imageCapture by mutableStateOf(createImageCapture())
 
-    var imageAnalysis: ImageAnalysis = createImageAnalysis()
+    var imageAnalysis by mutableStateOf(createImageAnalysis())
 
     val recorder: Recorder = Recorder.Builder()
         .setQualitySelector(QualitySelector.from(Quality.HD))
