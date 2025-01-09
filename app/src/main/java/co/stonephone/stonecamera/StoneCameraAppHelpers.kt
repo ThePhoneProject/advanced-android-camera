@@ -34,12 +34,15 @@ object StoneCameraAppHelpers {
             contentValues
         ).build()
 
+        // TODO plugins: beforeCapturePhoto (build output options)
+
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(MyApplication.getAppContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = outputFileResults.savedUri
+                    // TODO plugins: onImageSaved (process saved file)
                     Log.d("StoneCameraApp", "Photo saved at: $savedUri")
                 }
 

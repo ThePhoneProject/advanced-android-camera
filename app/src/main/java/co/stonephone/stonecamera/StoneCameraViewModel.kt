@@ -286,6 +286,7 @@ class StoneCameraViewModel(
 
     fun capturePhoto(imageCapture: ImageCapture) {
         StoneCameraAppHelpers.capturePhoto(imageCapture)
+        this.triggerShutterFlash()
     }
 
     //--------------------------------------------------------------------------------
