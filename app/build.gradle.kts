@@ -83,6 +83,11 @@ dependencies {
 
     // ML Kit for Barcode/QR scanning
     implementation(libs.barcode.scanning)
+
+    // TFLite
+    implementation(libs.tflite.task.vision)
+    implementation(libs.tflite.gpu)
+    implementation(libs.tflite.gpu.delegate)
 }
 
 
