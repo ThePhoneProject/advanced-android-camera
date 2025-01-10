@@ -1,5 +1,6 @@
 package co.stonephone.stonecamera.plugins
 
+import android.content.ContentValues
 import android.media.Image
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -45,6 +46,27 @@ interface IPlugin {
     ): ImageCapture.Builder {
         return imageCapture
     }
+
+    fun beforeCapturePhoto(
+        stoneCameraViewModel: StoneCameraViewModel,
+        cv: ContentValues
+    ): ContentValues {
+        return cv
+    }
+
+    fun onCaptureProcessProgressed(
+        stoneCameraViewModel: StoneCameraViewModel,
+        progress: Int
+    ) {
+    }
+
+    fun onImageSaved(
+        stoneCameraViewModel: StoneCameraViewModel,
+        outputFileResults: ImageCapture.OutputFileResults
+    ) {
+    }
+
+    fun onCaptureStarted(stoneCameraViewModel: StoneCameraViewModel) {}
 
     val onImageAnalysis: ((
         viewModel: StoneCameraViewModel,
