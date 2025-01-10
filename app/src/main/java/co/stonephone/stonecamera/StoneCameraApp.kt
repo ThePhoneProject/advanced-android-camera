@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.stonephone.stonecamera.plugins.AspectRatioPlugin
-import co.stonephone.stonecamera.plugins.DebugPlugin
 import co.stonephone.stonecamera.plugins.FlashPlugin
 import co.stonephone.stonecamera.plugins.FocusBasePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
+import co.stonephone.stonecamera.plugins.PortraitModePlugin
 import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
@@ -48,6 +48,7 @@ val shootModes = arrayOf("Photo", "Video")
 // ZoomBar depends on ZoomBase, etc.
 val PLUGINS = listOf(
     QRScannerPlugin(),
+    PortraitModePlugin(),
     ZoomBasePlugin(),
     ZoomBarPlugin(),
     FocusBasePlugin(),
