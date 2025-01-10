@@ -20,29 +20,43 @@ object StoneCameraAppHelpers {
      *  - call takePicture
      */
     fun capturePhoto(
+        viewModel: StoneCameraViewModel,
         imageCapture: ImageCapture,
     ) {
         val filename = "IMG_${System.currentTimeMillis()}.jpg"
-        val contentValues = ContentValues().apply {
+        var contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/StoneCameraApp")
         }
+
+        contentValues = viewModel.beforeCapturePhoto(contentValues)
+
         val outputOptions = ImageCapture.OutputFileOptions.Builder(
             MyApplication.getAppContext().contentResolver,
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             contentValues
         ).build()
 
-        // TODO plugins: beforeCapturePhoto (build output options)
-
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(MyApplication.getAppContext()),
             object : ImageCapture.OnImageSavedCallback {
+                override fun onCaptureProcessProgressed(progress: Int) {
+                    super.onCaptureProcessProgressed(progress)
+
+                    viewModel.onCaptureProcessProgressed(progress)
+                }
+
+                override fun onCaptureStarted() {
+                    super.onCaptureStarted()
+
+                    viewModel.onCaptureStarted()
+                }
+
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = outputFileResults.savedUri
-                    // TODO plugins: onImageSaved (process saved file)
+                    viewModel.onImageSaved(outputFileResults)
                     Log.d("StoneCameraApp", "Photo saved at: $savedUri")
                 }
 

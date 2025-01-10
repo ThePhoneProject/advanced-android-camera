@@ -34,11 +34,11 @@ import co.stonephone.stonecamera.plugins.FocusBasePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
 import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
+import co.stonephone.stonecamera.plugins.ShutterFlashPlugin
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
 import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
-import co.stonephone.stonecamera.ui.ShutterFlashOverlay
 import co.stonephone.stonecamera.ui.StoneCameraPreview
 import co.stonephone.stonecamera.utils.calculateImageCoverageRegion
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
@@ -57,6 +57,7 @@ val PLUGINS = listOf(
     FlashPlugin(),
     AspectRatioPlugin(),
     CaptureUtilsPlugin(),
+    ShutterFlashPlugin(),
 //    DebugPlugin()
 )
 
@@ -75,7 +76,6 @@ fun StoneCameraApp(
 
     val isRecording = stoneCameraViewModel.isRecording
     val selectedMode = stoneCameraViewModel.selectedMode
-    val showShutterFlash = stoneCameraViewModel.showShutterFlash
 
     val plugins by remember { stoneCameraViewModel::plugins }
     val previewView = stoneCameraViewModel.previewView
@@ -135,14 +135,6 @@ fun StoneCameraApp(
                     it.renderViewfinder(stoneCameraViewModel, it)
                 }
             }
-        }
-
-
-        // If showShutterFlash is true, display the overlay
-        if (showShutterFlash) {
-            ShutterFlashOverlay(onFlashComplete = {
-                stoneCameraViewModel.onShutterFlashComplete()
-            })
         }
 
         // Bottom controls
@@ -230,9 +222,7 @@ fun StoneCameraApp(
                                     when (selectedMode) {
                                         "Photo" -> {
                                             // Then capture the photo
-                                            stoneCameraViewModel.capturePhoto(
-                                                stoneCameraViewModel.imageCapture,
-                                            )
+                                            stoneCameraViewModel.capturePhoto()
                                         }
 
                                         "Video" -> {

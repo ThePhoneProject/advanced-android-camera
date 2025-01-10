@@ -2,6 +2,7 @@
 package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
@@ -69,10 +70,6 @@ class StoneCameraViewModel(
         private set
 
     var selectedMode by mutableStateOf("Photo")
-        private set
-
-    // TODO make it save between sessions
-    var showShutterFlash by mutableStateOf(false)
         private set
 
     private val _plugins = mutableListOf<IPlugin>()
@@ -272,24 +269,29 @@ class StoneCameraViewModel(
         bindUseCases()
     }
 
-
-    /**
-     * For showing/hiding a shutter flash overlay when capturing a photo.
-     */
-    fun triggerShutterFlash() {
-        showShutterFlash = true
+    fun capturePhoto() {
+        StoneCameraAppHelpers.capturePhoto(this, imageCapture)
     }
 
-    fun onShutterFlashComplete() {
-        showShutterFlash = false
+    fun beforeCapturePhoto(contentValues: ContentValues): ContentValues {
+        return plugins.fold(contentValues) { cv, plugin ->
+            plugin.beforeCapturePhoto(this, cv)
+        }
     }
 
-    fun capturePhoto(imageCapture: ImageCapture) {
-        StoneCameraAppHelpers.capturePhoto(imageCapture)
-        this.triggerShutterFlash()
+    fun onCaptureProcessProgressed(progress: Int) {
+        plugins.forEach { it.onCaptureProcessProgressed(this, progress) }
     }
 
-    //--------------------------------------------------------------------------------
+    fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+        plugins.forEach { it.onImageSaved(this, outputFileResults) }
+    }
+
+    fun onCaptureStarted() {
+        plugins.forEach { it.onCaptureStarted(this) }
+    }
+
+    //-----------------W---------------------------------------------------------------
     // Recording logic
     //--------------------------------------------------------------------------------
 
