@@ -1,22 +1,23 @@
 package co.stonephone.stonecamera.plugins
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
-import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
 
-// Bad name - open to suggestions
-class CaptureUtilsPlugin : IPlugin {
-    override val id: String = "captureUtilsPlugin"
-    override val name: String = "Capture Utils"
+class VolumeControlsPlugin : IPlugin {
+    override val id: String = "volumeControlsPlugin"
+    override val name: String = "Volume Controls"
 
     var viewModel: StoneCameraViewModel? = null
     var isZoomMode = false
@@ -34,7 +35,9 @@ class CaptureUtilsPlugin : IPlugin {
         activity?.let {
             it.window.callback = object : android.view.Window.Callback by it.window.callback {
                 override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-                    if (isZoomMode) {
+                    val controlModeGet = viewModel.getSetting<String>("volumeControlMode")
+
+                    if (isZoomMode || controlModeGet == "Zoom") {
                         clearValueRunnable?.let { handler.removeCallbacks(it) }
 
                         clearValueRunnable = Runnable {
@@ -81,5 +84,24 @@ class CaptureUtilsPlugin : IPlugin {
 
     }
 
-    override val settings: List<PluginSetting> = emptyList()
+    override val settings: List<PluginSetting> = listOf(
+        PluginSetting.EnumSetting(
+            key = "volumeControlMode",
+            options = listOf("Zoom", "Capture", "Smart"),
+            defaultValue = "Smart",
+            renderLocation = SettingLocation.TOP,
+            render = { value ->
+                Text(
+                    value.uppercase(), color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(8.dp)
+                )
+            },
+            onChange = { viewModel, value ->
+                // NOOP
+            }
+        )
+    )
 }
