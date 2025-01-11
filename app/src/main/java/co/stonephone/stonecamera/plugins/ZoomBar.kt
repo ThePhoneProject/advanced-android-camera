@@ -49,6 +49,4 @@ class ZoomBarPlugin : IPlugin {
     override fun initialize(viewModel: StoneCameraViewModel) {
 
     }
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }

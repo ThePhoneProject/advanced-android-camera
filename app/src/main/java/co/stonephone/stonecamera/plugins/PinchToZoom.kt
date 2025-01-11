@@ -49,6 +49,4 @@ class PinchToZoomPlugin : IPlugin {
             true
         }
     }
-
-    override val settings: List<PluginSetting> = emptyList()
 }

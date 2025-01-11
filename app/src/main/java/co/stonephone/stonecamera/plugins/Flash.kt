@@ -40,37 +40,39 @@ class FlashPlugin : IPlugin {
         }
     }
 
-    override val settings: List<PluginSetting> = listOf(
-        PluginSetting.EnumSetting(
-            key = "flash",
-            defaultValue = "OFF",
-            options = listOf("OFF", "ON", "AUTO"),
-            render = { flashMode ->
-                Icon(
-                    imageVector = when (flashMode) {
-                        "OFF" -> Icons.Default.FlashOff // Replace with your preferred icon
-                        "ON" -> Icons.Default.FlashOn
-                        "AUTO" -> Icons.Default.FlashAuto // You may need to add custom icons for Flash Auto
-                        else -> {
-                            Icons.Default.FlashOff
-                        }
-                    },
-                    contentDescription = when (flashMode) {
-                        "OFF" -> "Flash Off"
-                        "ON" -> "Flash On"
-                        "AUTO" -> "Flash Auto"
-                        else -> {
-                            "Flash"
-                        }
-                    },
-                    tint = Color.White // Customize as needed
-                )
+    override val settings = { viewModel: StoneCameraViewModel ->
+        listOf(
+            PluginSetting.EnumSetting(
+                key = "flash",
+                defaultValue = "OFF",
+                options = listOf("OFF", "ON", "AUTO"),
+                render = { flashMode ->
+                    Icon(
+                        imageVector = when (flashMode) {
+                            "OFF" -> Icons.Default.FlashOff // Replace with your preferred icon
+                            "ON" -> Icons.Default.FlashOn
+                            "AUTO" -> Icons.Default.FlashAuto // You may need to add custom icons for Flash Auto
+                            else -> {
+                                Icons.Default.FlashOff
+                            }
+                        },
+                        contentDescription = when (flashMode) {
+                            "OFF" -> "Flash Off"
+                            "ON" -> "Flash On"
+                            "AUTO" -> "Flash Auto"
+                            else -> {
+                                "Flash"
+                            }
+                        },
+                        tint = Color.White // Customize as needed
+                    )
 
-            },
-            onChange = { viewModel, value ->
-                viewModel.recreateUseCases()
-            },
-            renderLocation = SettingLocation.TOP
+                },
+                onChange = { viewModel, value ->
+                    viewModel.recreateUseCases()
+                },
+                renderLocation = SettingLocation.TOP
+            )
         )
-    )
+    }
 }

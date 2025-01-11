@@ -57,6 +57,4 @@ class DebugPlugin : IPlugin {
         ) { }
 
     }
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }

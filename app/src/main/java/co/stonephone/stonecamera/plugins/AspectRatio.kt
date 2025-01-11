@@ -169,32 +169,34 @@ class AspectRatioPlugin : IPlugin {
         return nums[0]!! / nums[1]!!
     }
 
-    override val settings: List<PluginSetting> = listOf(
-        PluginSetting.EnumSetting(
-            key = "aspectRatio",
-            defaultValue = "16:9",
-            options = listOf("16:9", "4:3", "FULL"),
-            render = { value ->
-                Text(
-                    text = value,
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(8.dp)
-                )
-            },
-            onChange = { viewModel, value ->
-                val previewView = viewModel.previewView
-                if (viewModel.getSetting<String>("aspectRatio") === "FULL") {
-                    previewView!!.scaleType = PreviewView.ScaleType.FILL_CENTER
-                } else {
-                    previewView!!.scaleType = PreviewView.ScaleType.FIT_CENTER
-                }
-                viewModel.recreateUseCases()
+    override val settings = { viewModel: StoneCameraViewModel ->
+        listOf(
+            PluginSetting.EnumSetting(
+                key = "aspectRatio",
+                defaultValue = "16:9",
+                options = listOf("16:9", "4:3", "FULL"),
+                render = { value ->
+                    Text(
+                        text = value,
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(8.dp)
+                    )
+                },
+                onChange = { viewModel, value ->
+                    val previewView = viewModel.previewView
+                    if (viewModel.getSetting<String>("aspectRatio") === "FULL") {
+                        previewView!!.scaleType = PreviewView.ScaleType.FILL_CENTER
+                    } else {
+                        previewView!!.scaleType = PreviewView.ScaleType.FIT_CENTER
+                    }
+                    viewModel.recreateUseCases()
 
-            },
-            renderLocation = SettingLocation.TOP
+                },
+                renderLocation = SettingLocation.TOP
+            )
         )
-    )
+    }
 }

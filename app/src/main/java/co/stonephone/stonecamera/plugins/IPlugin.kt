@@ -19,6 +19,16 @@ interface IPlugin {
     // The name of the plugin (for UI display purposes)
     val name: String
 
+    fun isEnabled(viewModel: StoneCameraViewModel): Boolean {
+        return true
+    }
+
+    val modeLabel: String?
+        get() = null
+
+    val renderModeControl: @Composable() (() -> Unit)?
+        get() = null
+
     // Nullable Composable render function for the plugin
     // This function takes the ViewModel and the plugin instance as parameters and renders UI
     @Composable
@@ -76,7 +86,8 @@ interface IPlugin {
         get() = null
 
     // Settings for the plugin
-    val settings: List<PluginSetting>
+    val settings: (viewModel: StoneCameraViewModel) -> List<PluginSetting>
+        get() = { emptyList() }
 }
 
 enum class SettingLocation {
