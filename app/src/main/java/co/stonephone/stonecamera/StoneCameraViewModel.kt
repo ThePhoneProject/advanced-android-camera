@@ -32,7 +32,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
 @Suppress("UNCHECKED_CAST")
@@ -354,7 +353,7 @@ class StoneCameraViewModel(
 
                 // TODO move this into a plugin-level solution
                 // also: on more powerful devices that can support 3 use-cases, we should bind them all from day 1 for fast switching
-                if (selectedMode == "Photo") {
+                if (selectedMode == "photo") {
                     camera = _cameraProvider!!.bindToLifecycle(
                         lifecycleOwner!!,
                         cameraSelector,

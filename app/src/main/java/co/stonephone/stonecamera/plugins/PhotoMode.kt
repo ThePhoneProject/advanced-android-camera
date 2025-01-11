@@ -59,24 +59,16 @@ class PhotoModePlugin : IPlugin {
 
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
+                    Box(contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
-                                Color.White,
-                                shape = CircleShape
+                                Color.White, shape = CircleShape
                             )
                             .clickable {
                                 // Then capture the photo
-                                viewModel.capturePhoto(
-                                    viewModel.imageCapture,
-                                )
-
-                                // Trigger the shutter flash overlay
-                                viewModel.triggerShutterFlash()
-                            }
-                    ) {}
+                                viewModel.capturePhoto()
+                            }) {}
                 }
 
                 // Camera Switcher Button

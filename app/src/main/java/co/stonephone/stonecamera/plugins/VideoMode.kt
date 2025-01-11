@@ -80,33 +80,29 @@ class VideoModePlugin : IPlugin {
                     modifier = Modifier
                         .size(60.dp)
                         .border(1.dp, Color.White, CircleShape)
-                        .padding(4.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(4.dp), contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .background(
-                                Color.Red,
-                                shape = if (!isRecording) CircleShape else RectangleShape
-                            )
-                            .fillMaxSize(if (!isRecording) 1f else 0.5f)
-                            .clickable {
-                                if (!isRecording) {
-                                    // Start recording
-                                    viewModel.startRecording(
-                                        viewModel.videoCapture
-                                    ) { uri ->
-                                        Log.d(
-                                            "StoneCameraApp", "Video saved to: $uri"
-                                        )
-                                    }
-                                } else {
-                                    // Stop recording
-                                    viewModel.stopRecording()
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier
+                        .background(
+                            Color.Red, shape = if (!isRecording) CircleShape else RectangleShape
+                        )
+                        .fillMaxSize(if (!isRecording) 1f else 0.5f)
+                        .clickable {
+                            if (!isRecording) {
+                                // Start recording
+                                viewModel.startRecording(
+                                    viewModel.videoCapture
+                                ) { uri ->
+                                    Log.d(
+                                        "StoneCameraApp", "Video saved to: $uri"
+                                    )
                                 }
-
+                            } else {
+                                // Stop recording
+                                viewModel.stopRecording()
                             }
+
+                        }
 
 
                     ) {}
@@ -122,24 +118,16 @@ class VideoModePlugin : IPlugin {
 
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
+                        Box(contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    Color.White,
-                                    shape = CircleShape
+                                    Color.White, shape = CircleShape
                                 )
                                 .clickable {
                                     // Then capture the photo
-                                    viewModel.capturePhoto(
-                                        viewModel.imageCapture,
-                                    )
-
-                                    // Trigger the shutter flash overlay
-                                    viewModel.triggerShutterFlash()
-                                }
-                        ) {}
+                                    viewModel.capturePhoto()
+                                }) {}
                     }
                 } else {
                     // Camera Switcher Button
