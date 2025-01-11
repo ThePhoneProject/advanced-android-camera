@@ -183,7 +183,4 @@ class QRScannerPlugin : IPlugin {
 
         deferred
     }
-
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }

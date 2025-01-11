@@ -8,14 +8,8 @@ import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipCameraAndroid
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -29,20 +23,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import co.stonephone.stonecamera.plugins.AspectRatioPlugin
 import co.stonephone.stonecamera.plugins.FlashPlugin
 import co.stonephone.stonecamera.plugins.FocusBasePlugin
+import co.stonephone.stonecamera.plugins.PhotoModePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
 import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
 import co.stonephone.stonecamera.plugins.ShutterFlashPlugin
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
 import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
+import co.stonephone.stonecamera.plugins.VideoModePlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
 import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
 import co.stonephone.stonecamera.ui.StoneCameraPreview
 import co.stonephone.stonecamera.utils.calculateImageCoverageRegion
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
-
-val shootModes = arrayOf("Photo", "Video")
 
 // Order here is important, they are loaded and initialised in the order they are listed
 // ZoomBar depends on ZoomBase, etc.
@@ -57,6 +51,8 @@ val PLUGINS = listOf(
     AspectRatioPlugin(),
     ShutterFlashPlugin(),
     VolumeControlsPlugin(),
+    PhotoModePlugin(),
+    VideoModePlugin(),
 //    DebugPlugin()
 )
 
@@ -73,12 +69,14 @@ fun StoneCameraApp(
         factory = StoneCameraViewModelFactory(context, lifecycleOwner, PLUGINS)
     )
 
-    val isRecording = stoneCameraViewModel.isRecording
     val selectedMode = stoneCameraViewModel.selectedMode
 
     val plugins by remember { stoneCameraViewModel::plugins }
+    val modePlugins = plugins.filter { it.modeLabel != null }
     val previewView = stoneCameraViewModel.previewView
     val imageCapture = stoneCameraViewModel.imageCapture
+
+    val activeModePlugin = modePlugins.find { it.modeLabel == selectedMode }
 
     var viewfinderDimensions by remember { mutableStateOf<Rect?>(null) }
 
@@ -165,102 +163,19 @@ fun StoneCameraApp(
                             .padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        shootModes.forEach { mode ->
-                            Text(text = mode.uppercase(),
-                                color = if (mode == selectedMode) Color(0xFFFFCC00) else Color.White,
+                        modePlugins.forEach { modePlugin ->
+                            val modeLabel = modePlugin.modeLabel!!
+                            Text(text = modeLabel.uppercase(),
+                                color = if (modeLabel == selectedMode) Color(0xFFFFCC00) else Color.White,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
-                                    stoneCameraViewModel.selectMode(mode)
+                                    stoneCameraViewModel.selectMode(modeLabel)
                                 })
                         }
                     }
-
-                    // Bottom row (Flip + Shutter)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Camera Switcher Button
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(Color.Transparent, shape = CircleShape)
-                                .clickable {
-                                    stoneCameraViewModel.toggleCameraFacing()
-                                }, contentAlignment = Alignment.Center
-                        ) {
-
-                        }
-
-                        // Shutter button
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .border(1.dp, Color.White, CircleShape)
-                                .padding(4.dp),
-
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = if (isRecording) {
-                                    Modifier
-                                        .background(Color.Red)
-                                        .fillMaxSize(0.5f)
-                                } else {
-                                    Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            if (selectedMode == "Video") Color(0xFFFF3B30) else Color.White,
-                                            shape = CircleShape
-                                        )
-
-
-                                }.clickable {
-                                    when (selectedMode) {
-                                        "Photo" -> {
-                                            // Then capture the photo
-                                            stoneCameraViewModel.capturePhoto()
-                                        }
-
-                                        "Video" -> {
-                                            if (!isRecording) {
-                                                // Start recording
-                                                stoneCameraViewModel.startRecording(
-                                                    stoneCameraViewModel.videoCapture
-                                                ) { uri ->
-                                                    Log.d(
-                                                        "StoneCameraApp", "Video saved to: $uri"
-                                                    )
-                                                }
-                                            } else {
-                                                // Stop recording
-                                                stoneCameraViewModel.stopRecording()
-                                            }
-                                        }
-                                    }
-
-                                }, contentAlignment = Alignment.Center
-                            ) {}
-                        }
-
-                        // Camera Switcher Button
-                        IconButton(
-                            onClick = { stoneCameraViewModel.toggleCameraFacing() },
-                            modifier = Modifier
-                                .size(48.dp)
-                                .padding(8.dp)
-                                .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.FlipCameraAndroid, // Use FlipCameraAndroid if preferred
-                                contentDescription = "Flip Camera",
-                                tint = Color.White, // Customize the color if needed
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
+                    
+                    activeModePlugin?.renderModeControl?.invoke()
                 }
             }
         }

@@ -69,7 +69,7 @@ class StoneCameraViewModel(
     var isRecording by mutableStateOf(false)
         private set
 
-    var selectedMode by mutableStateOf("Photo")
+    var selectedMode by mutableStateOf("photo")
         private set
 
     private val _plugins = mutableListOf<IPlugin>()
@@ -123,12 +123,12 @@ class StoneCameraViewModel(
     init {
 
         // Some settings affect use-cases, e.g. aspect ratio
-        pluginSettings = registeredPlugins.flatMap { it.settings }
-        registeredPlugins.forEach {
-            it.settings.forEach { setting ->
-                settings[setting.key] = getPluginSetting(setting.key)
-            }
+        pluginSettings = registeredPlugins.flatMap { it.settings(this) }
+
+        pluginSettings.forEach { setting ->
+            settings[setting.key] = getPluginSetting(setting.key)
         }
+
 
         // Rebuild use-cases to match our persisted prefs
         recreateUseCases()
@@ -170,12 +170,10 @@ class StoneCameraViewModel(
             _plugins.add(plugin) // Add to the initialized plugins list
         }
 
+        pluginSettings = registeredPlugins.flatMap { it.settings(this) }
 
-        pluginSettings = registeredPlugins.flatMap { it.settings }
-        registeredPlugins.forEach {
-            it.settings.forEach { setting ->
-                settings[setting.key] = getPluginSetting(setting.key)
-            }
+        pluginSettings.forEach { setting ->
+            settings[setting.key] = getPluginSetting(setting.key)
         }
     }
 
@@ -356,7 +354,7 @@ class StoneCameraViewModel(
 
                 // TODO move this into a plugin-level solution
                 // also: on more powerful devices that can support 3 use-cases, we should bind them all from day 1 for fast switching
-                if(selectedMode == "Photo") {
+                if (selectedMode == "Photo") {
                     camera = _cameraProvider!!.bindToLifecycle(
                         lifecycleOwner!!,
                         cameraSelector,
