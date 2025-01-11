@@ -11,6 +11,11 @@ import androidx.compose.runtime.Composable
 import co.stonephone.stonecamera.StoneCameraViewModel
 import kotlinx.coroutines.CompletableDeferred
 
+// PluginUseCase Enum ("photo", "analysis", "video")
+enum class PluginUseCase {
+    PHOTO, ANALYSIS, VIDEO
+}
+
 // Plugin interface definition
 interface IPlugin {
     // The unique identifier for the plugin
@@ -28,6 +33,9 @@ interface IPlugin {
 
     val renderModeControl: @Composable() (() -> Unit)?
         get() = null
+
+    val modeUseCases: List<PluginUseCase>
+        get() = listOf(PluginUseCase.PHOTO, PluginUseCase.ANALYSIS, PluginUseCase.VIDEO)
 
     // Nullable Composable render function for the plugin
     // This function takes the ViewModel and the plugin instance as parameters and renders UI
@@ -48,6 +56,15 @@ interface IPlugin {
 
     fun onPreviewView(viewModel: StoneCameraViewModel, previewView: PreviewView): PreviewView {
         return previewView
+    }
+
+
+    fun onModeSelected(
+        viewModel: StoneCameraViewModel,
+        previousMode: String,
+        nextMode: String
+    ): Unit {
+
     }
 
     fun onImageCapture(
