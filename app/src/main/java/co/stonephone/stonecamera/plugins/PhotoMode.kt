@@ -28,6 +28,10 @@ class PhotoModePlugin : IPlugin {
 
     private lateinit var viewModel: StoneCameraViewModel
 
+    // Should Analysis be added by QRScanner instead? Probably doesn't matter for now
+    override val modeUseCases: List<PluginUseCase>
+        get() = listOf(PluginUseCase.PHOTO, PluginUseCase.ANALYSIS, PluginUseCase.VIDEO)
+
     override val modeLabel
         get() = "photo"
 

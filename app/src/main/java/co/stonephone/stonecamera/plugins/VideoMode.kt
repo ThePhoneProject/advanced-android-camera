@@ -15,10 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +32,19 @@ class VideoModePlugin : IPlugin {
 
     private lateinit var viewModel: StoneCameraViewModel
 
+    override fun onModeSelected(
+        viewModel: StoneCameraViewModel,
+        previousMode: String,
+        nextMode: String
+    ) {
+        if (previousMode == modeLabel) {
+            viewModel.stopRecording()
+        }
+    }
+
+    override val modeUseCases: List<PluginUseCase>
+        get() = listOf(PluginUseCase.VIDEO, PluginUseCase.PHOTO, PluginUseCase.ANALYSIS)
+
     override val modeLabel
         get() = "video"
 
@@ -39,6 +52,7 @@ class VideoModePlugin : IPlugin {
         get() = @Composable {
 
             val isRecording by viewModel::isRecording
+            val isPaused by viewModel::isPaused
 
             // Bottom row (Flip + Shutter)
             Row(
@@ -49,19 +63,34 @@ class VideoModePlugin : IPlugin {
                 // Camera Switcher Button
                 if (isRecording) {
                     IconButton(
-                        onClick = { },
+                        onClick = {
+                            if (isPaused) {
+                                viewModel.resumeRecording()
+                            } else {
+                                viewModel.pauseRecording()
+                            }
+                        },
                         modifier = Modifier
                             .size(48.dp)
                             .padding(8.dp)
                             .border(1.dp, Color.White, CircleShape)
                             .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Pause, // Use FlipCameraAndroid if preferred
-                            contentDescription = "Pause Recording",
-                            tint = Color.White,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        if (isPaused) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = "Resume Recording",
+                                tint = Color.White,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Pause,
+                                contentDescription = "Pause Recording",
+                                tint = Color.White,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 } else {
                     Box(
@@ -109,6 +138,7 @@ class VideoModePlugin : IPlugin {
                 }
 
                 if (isRecording) {
+                    // TODO only show this button if usecase is bound
                     // Snapshot Button
                     Box(
                         modifier = Modifier

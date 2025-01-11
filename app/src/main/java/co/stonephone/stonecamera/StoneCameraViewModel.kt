@@ -5,6 +5,8 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
@@ -24,6 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import co.stonephone.stonecamera.plugins.IPlugin
 import co.stonephone.stonecamera.plugins.PluginSetting
+import co.stonephone.stonecamera.plugins.PluginUseCase
 import co.stonephone.stonecamera.utils.StoneCameraInfo
 import co.stonephone.stonecamera.utils.createCameraSelectorForId
 import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
@@ -66,6 +69,9 @@ class StoneCameraViewModel(
         private set
 
     var isRecording by mutableStateOf(false)
+        private set
+
+    var isPaused by mutableStateOf(false)
         private set
 
     var selectedMode by mutableStateOf("photo")
@@ -257,9 +263,8 @@ class StoneCameraViewModel(
      * Switch between Photo and Video modes.
      */
     fun selectMode(mode: String) {
-        // If we switch away from Video while recording, we stop
-        if (mode == "Photo" && isRecording) {
-            stopRecording()
+        plugins.forEach {
+            it.onModeSelected(this, selectedMode, mode)
         }
         selectedMode = mode
 
@@ -313,6 +318,16 @@ class StoneCameraViewModel(
         isRecording = false
     }
 
+    fun pauseRecording() {
+        currentRecording?.pause()
+        isPaused = true
+    }
+
+    fun resumeRecording() {
+        currentRecording?.resume()
+        isPaused = false
+    }
+
     /**
      * Adjust the brightness of the camera preview and captured images.
      * @param brightnessLevel A value between -1.0 (darkest) and 1.0 (brightest).
@@ -348,27 +363,46 @@ class StoneCameraViewModel(
 
                 val cameraSelector = createCameraSelectorForId(_selectedCameraId!!)
 
+                val manager = MyApplication.getAppContext()
+                    .getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                val chars = manager.getCameraCharacteristics(_selectedCameraId!!)
+                val level = chars.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+                val numConcurrentUseCases = when (level) {
+                    CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY -> 1
+                    CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED -> 2
+                    CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL -> 3
+                    CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_3 -> 3
+                    else -> 1
+                }
+
+
                 previewViewTouchHandlers.clear()
                 _cameraProvider!!.unbindAll()
 
-                // TODO move this into a plugin-level solution
-                // also: on more powerful devices that can support 3 use-cases, we should bind them all from day 1 for fast switching
-                if (selectedMode == "photo") {
-                    camera = _cameraProvider!!.bindToLifecycle(
-                        lifecycleOwner!!,
-                        cameraSelector,
-                        preview,
-                        imageCapture,
-                        imageAnalysis,
-                    )
-                } else {
-                    camera = _cameraProvider!!.bindToLifecycle(
-                        lifecycleOwner!!,
-                        cameraSelector,
-                        preview,
-                        videoCapture,
-                    )
+                val selectedModePlugin = plugins.find { it.modeLabel == selectedMode }
+                val requiredUseCases: List<PluginUseCase> =
+                    selectedModePlugin?.modeUseCases ?: emptyList()
+
+                // All use-cases (including not needed by selected plugin), but retaining the order from the selected plugin
+                val prioritisedUseCases =
+                    requiredUseCases + PluginUseCase.entries.filter { it !in requiredUseCases }
+                // TODO tell plugins if only some use-cases are available
+                val availableUseCases = prioritisedUseCases.take(numConcurrentUseCases)
+
+                val useCases = availableUseCases.map { useCase ->
+                    when (useCase) {
+                        PluginUseCase.PHOTO -> imageCapture
+                        PluginUseCase.ANALYSIS -> imageAnalysis
+                        PluginUseCase.VIDEO -> videoCapture
+                    }
                 }
+
+                camera = _cameraProvider!!.bindToLifecycle(
+                    lifecycleOwner!!,
+                    cameraSelector,
+                    preview,
+                    *useCases.toTypedArray()
+                )
 
                 initializePlugins()
 
