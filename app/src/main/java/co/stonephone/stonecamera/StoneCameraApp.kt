@@ -1,4 +1,6 @@
 // StoneCameraApp.kt
+@file:kotlin.OptIn(ExperimentalMaterial3Api::class)
+
 package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
@@ -10,6 +12,12 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlipCameraAndroid
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -27,6 +35,7 @@ import co.stonephone.stonecamera.plugins.PhotoModePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
 import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
+import co.stonephone.stonecamera.plugins.SettingsTrayPlugin
 import co.stonephone.stonecamera.plugins.ShutterFlashPlugin
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
 import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
@@ -53,10 +62,13 @@ val PLUGINS = listOf(
     VolumeControlsPlugin(),
     PhotoModePlugin(),
     VideoModePlugin(),
+    SettingsTrayPlugin()
 //    DebugPlugin()
 )
 
-@OptIn(ExperimentalCamera2Interop::class)
+@OptIn(
+    ExperimentalCamera2Interop::class
+)
 @SuppressLint("ClickableViewAccessibility")
 @Composable
 fun StoneCameraApp(
@@ -141,8 +153,13 @@ fun StoneCameraApp(
                 .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            plugins.map {
-                it.renderTray(stoneCameraViewModel, it)
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                plugins.map {
+                    it.renderTray(stoneCameraViewModel, it)
+                }
             }
 
             // Translucent overlay for mode switch & shutter
@@ -179,5 +196,6 @@ fun StoneCameraApp(
                 }
             }
         }
+
     }
 }
