@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.stonephone.stonecamera.plugins.AspectRatioPlugin
-import co.stonephone.stonecamera.plugins.CaptureUtilsPlugin
-import co.stonephone.stonecamera.plugins.DebugPlugin
 import co.stonephone.stonecamera.plugins.FlashPlugin
 import co.stonephone.stonecamera.plugins.FocusBasePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
@@ -36,6 +34,7 @@ import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
 import co.stonephone.stonecamera.plugins.ShutterFlashPlugin
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
+import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
 import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
@@ -56,8 +55,8 @@ val PLUGINS = listOf(
     PinchToZoomPlugin(),
     FlashPlugin(),
     AspectRatioPlugin(),
-    CaptureUtilsPlugin(),
     ShutterFlashPlugin(),
+    VolumeControlsPlugin(),
 //    DebugPlugin()
 )
 
