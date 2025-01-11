@@ -60,7 +60,7 @@ class StoneCameraViewModel(
     var camera: Camera? by mutableStateOf(null)
         private set
 
-    private var _selectedCameraId = "0"
+    private var _selectedCameraId: String? = null
 
     var facing by mutableStateOf(CameraSelector.LENS_FACING_BACK)
         private set
@@ -268,6 +268,8 @@ class StoneCameraViewModel(
             stopRecording()
         }
         selectedMode = mode
+
+        bindUseCases()
     }
 
 
@@ -339,24 +341,34 @@ class StoneCameraViewModel(
         // TODO consider a job that can be interrupted?
 
         // These dependencies load in asynchronously, and can be destroyed & re-created at various points (e.g. rotating)
-        if (previewView == null || _cameraProvider == null || lifecycleOwner == null) return
+        if (previewView == null || _cameraProvider == null || lifecycleOwner == null || _selectedCameraId == null) return
         else {
             try {
                 preview.surfaceProvider = previewView!!.surfaceProvider
 
-                val cameraSelector = createCameraSelectorForId(_selectedCameraId)
+                val cameraSelector = createCameraSelectorForId(_selectedCameraId!!)
 
                 previewViewTouchHandlers.clear()
                 _cameraProvider!!.unbindAll()
 
-                camera = _cameraProvider!!.bindToLifecycle(
-                    lifecycleOwner!!,
-                    cameraSelector,
-                    preview,
-                    imageCapture,
-                    videoCapture,
-                    imageAnalysis,
-                )
+                // TODO move this into a plugin-level solution
+                // also: on more powerful devices that can support 3 use-cases, we should bind them all from day 1 for fast switching
+                if(selectedMode == "Photo") {
+                    camera = _cameraProvider!!.bindToLifecycle(
+                        lifecycleOwner!!,
+                        cameraSelector,
+                        preview,
+                        imageCapture,
+                        imageAnalysis,
+                    )
+                } else {
+                    camera = _cameraProvider!!.bindToLifecycle(
+                        lifecycleOwner!!,
+                        cameraSelector,
+                        preview,
+                        videoCapture,
+                    )
+                }
 
                 initializePlugins()
 
