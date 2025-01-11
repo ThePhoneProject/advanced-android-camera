@@ -89,7 +89,7 @@ fun StoneCameraApp(
     LaunchedEffect(previewView, imageCapture) {
         if (previewView != null && imageCapture != null) {
             viewfinderDimensions = calculateImageCoverageRegion(
-                previewView!!, imageCapture
+                previewView, imageCapture
             )
         }
     }
