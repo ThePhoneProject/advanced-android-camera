@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.utils.calculateImageCoverageRegion
-import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
 
 class DebugPlugin : IPlugin {
     override val id: String = "debugPlugin"

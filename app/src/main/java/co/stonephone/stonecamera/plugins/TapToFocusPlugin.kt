@@ -1,15 +1,12 @@
 package co.stonephone.stonecamera.plugins
 
 import android.annotation.SuppressLint
-import android.graphics.Rect
 import android.view.MotionEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.FocusReticle
-import co.stonephone.stonecamera.utils.calculateImageCoverageRegion
 
 class TapToFocusPlugin : IPlugin {
     override val id: String = "tapToFocusPlugin"

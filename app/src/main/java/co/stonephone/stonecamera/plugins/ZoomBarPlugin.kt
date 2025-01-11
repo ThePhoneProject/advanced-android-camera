@@ -1,12 +1,10 @@
 package co.stonephone.stonecamera.plugins
 
 import android.annotation.SuppressLint
-import androidx.compose.ui.platform.LocalContext
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.ZoomBar
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 

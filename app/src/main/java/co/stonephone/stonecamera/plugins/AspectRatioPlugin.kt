@@ -1,6 +1,5 @@
 package co.stonephone.stonecamera.plugins
 
-import android.app.Application
 import android.util.Size
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.ImageCapture
@@ -14,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.MyApplication
@@ -91,10 +89,13 @@ class AspectRatioPlugin : IPlugin {
         targetSize: Size?,     // e.g. 3000×3000 for 1:1
         ratio: Float?          // e.g. 1.0f for 1:1, 1.333...f for 4:3, etc.
     ): ResolutionSelector {
+        val sixteenByNine = 16f / 9f
+        val fourByThree = 4f / 3f
+        val wiggleRoom = 0.01f
         val aspectRatioConst = when {
             ratio == null -> null // “FULL” or unknown
-            kotlin.math.abs(ratio - (4f / 3f)) < 0.01f -> AspectRatio.RATIO_4_3
-            kotlin.math.abs(ratio - (16f / 9f)) < 0.01f -> AspectRatio.RATIO_16_9
+            kotlin.math.abs(ratio - (fourByThree)) < wiggleRoom -> AspectRatio.RATIO_4_3
+            kotlin.math.abs(ratio - (sixteenByNine)) < wiggleRoom -> AspectRatio.RATIO_16_9
             else -> null // e.g. 1:1 or any custom ratio
         }
 

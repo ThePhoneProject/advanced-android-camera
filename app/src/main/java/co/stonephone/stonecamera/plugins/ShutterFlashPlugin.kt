@@ -1,7 +1,6 @@
 package co.stonephone.stonecamera.plugins
 
 import android.annotation.SuppressLint
-import androidx.camera.core.ImageCapture
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut

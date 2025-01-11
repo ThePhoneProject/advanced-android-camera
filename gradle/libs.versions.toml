@@ -6,6 +6,7 @@ cameraxVersion = "1.4.1"
 coilCompose = "2.2.2"
 compiler = "1.5.15"
 composeBom = "2024.12.01"
+detektRulesCompose = "1.4.0"
 kotlin = "1.9.25"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -35,6 +36,7 @@ androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+detekt-rules-compose = { module = "ru.kode:detekt-rules-compose", version.ref = "detektRulesCompose" }
 junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
 androidx-monitor = { group = "androidx.test", name = "monitor", version.ref = "monitor" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
