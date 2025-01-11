@@ -109,7 +109,8 @@ fun StoneCameraApp(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopCenter),
+                .align(Alignment.TopCenter)
+                .windowInsetsPadding(WindowInsets.systemBars),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
