@@ -37,7 +37,15 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-
+    
+    # Change the version of the project
+    - name: Bump version
+      uses: Swisyn/android-version-generator-actions@v1.5
+      with:
+          gradlePath: app/build.gradle.kts 
+          versionCode: ${{github.run_number}}
+          versionName: 0.1.${{github.run_number}}
+            
     # Build and run unit tests
     - name: Build
       run: ./gradlew assembleRelease --no-daemon
