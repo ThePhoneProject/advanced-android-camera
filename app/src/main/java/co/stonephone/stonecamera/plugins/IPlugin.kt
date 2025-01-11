@@ -2,7 +2,6 @@ package co.stonephone.stonecamera.plugins
 
 import android.content.ContentValues
 import android.media.Image
-import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
@@ -115,6 +114,7 @@ enum class SettingLocation {
 sealed class PluginSetting(
     val key: String,
     val defaultValue: Any?,
+    val label: String,
     val onChange: (StoneCameraViewModel, Any?) -> Unit,
     val renderLocation: SettingLocation? = SettingLocation.NONE,
 ) {
@@ -122,13 +122,15 @@ sealed class PluginSetting(
     class EnumSetting(
         key: String,
         defaultValue: String,
+        label: String,
         renderLocation: SettingLocation? = SettingLocation.NONE,
         val options: List<String>,
-        val render: @Composable (value: String) -> Unit,
+        val render: @Composable (value: String, Boolean) -> Unit,
         onChange: (StoneCameraViewModel, String) -> Unit
     ) : PluginSetting(
         key,
         defaultValue,
+        label,
         onChange as (StoneCameraViewModel, Any?) -> Unit,
         renderLocation
     )
@@ -137,6 +139,7 @@ sealed class PluginSetting(
         key: String,
         defaultValue: Float,
         renderLocation: SettingLocation? = SettingLocation.NONE,
+        label: String,
         val minValue: Float,
         val maxValue: Float,
         val stepValue: Float? = null,
@@ -144,6 +147,7 @@ sealed class PluginSetting(
     ) : PluginSetting(
         key,
         defaultValue,
+        label,
         onChange as (StoneCameraViewModel, Any?) -> Unit,
         renderLocation
     )
@@ -151,8 +155,9 @@ sealed class PluginSetting(
     class CustomSetting(
         key: String,
         defaultValue: String,
+        label: String,
         renderLocation: SettingLocation? = SettingLocation.NONE,
         val customRender: @Composable (StoneCameraViewModel, Any?, (Any?) -> Unit) -> Unit, // Render function with a callback for value changes
         onChange: (StoneCameraViewModel, Any?) -> Unit
-    ) : PluginSetting(key, defaultValue, onChange, renderLocation)
+    ) : PluginSetting(key, defaultValue, label, onChange, renderLocation)
 }

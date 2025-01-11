@@ -5,7 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.RectF
 import android.media.Image
 import android.net.Uri
 import android.os.Handler
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,18 +52,19 @@ class QRScannerPlugin : IPlugin {
 
     var scanner: BarcodeScanner? = null
     var value by mutableStateOf<String?>(null)
-    var barcodePos by mutableStateOf<RectF?>(null)
+    var qrScannerEnabled by mutableStateOf("ON")
 
     private val handler = Handler(Looper.getMainLooper())
     private var clearValueRunnable: Runnable? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun initialize(viewModel: StoneCameraViewModel) {
+        value = null
         scanner = BarcodeScanning.getClient()
+        qrScannerEnabled = viewModel.getSetting<String>("qrScannerEnabled").toString()
     }
 
     var width = 0f
-
 
     // TODO RenderViewfinder to show the box around the QR code - I spent 6hrs on it and couldn't get it to line up
 
@@ -114,7 +115,6 @@ class QRScannerPlugin : IPlugin {
                             }
 
                             value = null
-                            barcodePos = null
                         })
                 ) {
                     Text(
@@ -133,54 +133,82 @@ class QRScannerPlugin : IPlugin {
 
     @SuppressLint("RestrictedApi")
     @OptIn(ExperimentalGetImage::class)
-        override val onImageAnalysis = { viewModel: StoneCameraViewModel,
+    override var onImageAnalysis = { viewModel: StoneCameraViewModel,
                                      imageProxy: ImageProxy,
                                      image: Image
         ->
-        val deferred = CompletableDeferred<Unit>()
+        var deferred = CompletableDeferred<Unit>()
 
-        val inputImage =
-            InputImage.fromMediaImage(image, imageProxy.imageInfo.rotationDegrees)
+        if (qrScannerEnabled == "ON") {
+            val inputImage =
+                InputImage.fromMediaImage(image, imageProxy.imageInfo.rotationDegrees)
 
-        scanner?.process(inputImage)
-            ?.addOnSuccessListener { barcodes ->
-                if (barcodes.size > 0) {
-                    val prevBarcode = value
-                    val barcode = barcodes[0]
-                    value = barcode.rawValue
+            scanner?.process(inputImage)
+                ?.addOnSuccessListener { barcodes ->
+                    if (barcodes.size > 0) {
+                        val prevBarcode = value
+                        val barcode = barcodes[0]
+                        value = barcode.rawValue
 
-                    if (value !== prevBarcode) {
-                        // Trigger haptic feedback
-                        val vibrator = MyApplication.getAppContext()
-                            .getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                        vibrator.vibrate(
-                            VibrationEffect.createOneShot(
-                                100,
-                                VibrationEffect.DEFAULT_AMPLITUDE
+                        if (value !== prevBarcode) {
+                            // Trigger haptic feedback
+                            val vibrator = MyApplication.getAppContext()
+                                .getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                            vibrator.vibrate(
+                                VibrationEffect.createOneShot(
+                                    100,
+                                    VibrationEffect.DEFAULT_AMPLITUDE
+                                )
                             )
-                        )
-                    }
-
-                    // Cancel any pending clear
-                    clearValueRunnable?.let { handler.removeCallbacks(it) }
-                } else {
-                    if (value !== null && clearValueRunnable == null) {
-                        clearValueRunnable = Runnable {
-                            value = null
-                            barcodePos = null
-                            clearValueRunnable = null
                         }
-                        handler.postDelayed(clearValueRunnable!!, 5000)
+
+                        // Cancel any pending clear
+                        clearValueRunnable?.let { handler.removeCallbacks(it) }
+                    } else {
+                        if (value !== null && clearValueRunnable == null) {
+                            clearValueRunnable = Runnable {
+                                value = null
+                                clearValueRunnable = null
+                            }
+                            handler.postDelayed(clearValueRunnable!!, 5000)
+                        }
                     }
+                    deferred.complete(Unit)
                 }
-                deferred.complete(Unit)
-            }
-            ?.addOnFailureListener {
-                // Handle failure
-                Log.e("QRCode", "QR Code Detection Failed", it)
-                deferred.completeExceptionally(it)
-            }
+                ?.addOnFailureListener {
+                    // Handle failure
+                    Log.e("QRCode", "QR Code Detection Failed", it)
+                    deferred.completeExceptionally(it)
+                }
+        } else {
+            deferred.complete(Unit)
+        }
 
         deferred
+    }
+
+    override val settings: (StoneCameraViewModel) -> List<PluginSetting> = { viewModel ->
+        listOf(
+            PluginSetting.EnumSetting(
+                key = "qrScannerEnabled",
+                label = "QR Scanner",
+                defaultValue = "ON",
+                options = listOf("ON", "OFF"),
+                render = { value, isSelected ->
+                    Text(
+                        text = value,
+                        color = if (isSelected) Color(0xFFFFCC00) else Color.White,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(8.dp)
+                    )
+                },
+                onChange = { viewModel, value ->
+                    viewModel.recreateUseCases()
+                },
+                renderLocation = SettingLocation.NONE
+            )
+        )
     }
 }

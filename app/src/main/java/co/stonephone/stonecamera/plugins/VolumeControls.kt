@@ -91,10 +91,11 @@ class VolumeControlsPlugin : IPlugin {
                     key = "volumeControlMode",
                     options = listOf("Zoom", "Capture", "Smart"),
                     defaultValue = "Smart",
-                    renderLocation = SettingLocation.TOP,
-                    render = { value ->
+                    renderLocation = SettingLocation.NONE,
+                    render = { value, isSelected ->
                         Text(
-                            value.uppercase(), color = Color.White,
+                            value.uppercase(), 
+                            color = if (isSelected) Color(0xFFFFCC00) else Color.White,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
@@ -103,7 +104,8 @@ class VolumeControlsPlugin : IPlugin {
                     },
                     onChange = { viewModel, value ->
                         // NOOP
-                    }
+                    },
+                    label = "Volume Control Mode"
                 )
             )
         }
