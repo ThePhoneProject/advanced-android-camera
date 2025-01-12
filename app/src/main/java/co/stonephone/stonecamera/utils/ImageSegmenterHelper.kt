@@ -83,11 +83,11 @@ class ImageSegmenterHelper(
             }
         }
 
-        if (imageSegmenterListener == null) {
-            throw IllegalStateException(
-                "ImageSegmenterListener must be set."
-            )
-        }
+//        if (imageSegmenterListener == null) {
+//            throw IllegalStateException(
+//                "ImageSegmenterListener must be set."
+//            )
+//        }
 
         try {
             val baseOptions = baseOptionsBuilder.build()
@@ -242,7 +242,34 @@ class ImageSegmenterHelper(
         const val MODEL_SELFIE_SEGMENTER_PATH = "selfie_segmenter.tflite"
 
         private const val TAG = "ImageSegmenterHelper"
+
+        val labelColors = listOf(
+            -16777216,
+            -8388608,
+            -16744448,
+            -8355840,
+            -16777088,
+            -8388480,
+            -16744320,
+            -8355712,
+            -12582912,
+            -4194304,
+            -12550144,
+            -4161536,
+            -12582784,
+            -4194176,
+            -12550016,
+            -4161408,
+            -16760832,
+            -8372224,
+            -16728064,
+            -8339456,
+            -16760704
+        )
+
     }
+
+
 
     interface SegmenterListener {
         fun onError(error: String, errorCode: Int = OTHER_ERROR)
