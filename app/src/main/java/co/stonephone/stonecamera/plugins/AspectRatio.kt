@@ -17,8 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.utils.Translatable
+import co.stonephone.stonecamera.utils.TranslatableString
 import co.stonephone.stonecamera.utils.getLargestMatchingSize
 import co.stonephone.stonecamera.utils.getLargestSensorSize
+import co.stonephone.stonecamera.utils.i18n
 
 class AspectRatioPlugin : IPlugin {
     override val id: String = "aspectRatioPlugin"
@@ -26,8 +29,8 @@ class AspectRatioPlugin : IPlugin {
 
     override fun initialize(viewModel: StoneCameraViewModel) {
         val previewView = viewModel.previewView
-        val aspectRatio = viewModel.getSetting<String>("aspectRatio")
-        if (aspectRatio === "FULL") {
+        val aspectRatio = viewModel.getSetting<TranslatableString>("aspectRatio")
+        if (aspectRatio?.resolve() === "FULL") {
             previewView!!.scaleType = PreviewView.ScaleType.FILL_CENTER
         } else {
             previewView!!.scaleType = PreviewView.ScaleType.FIT_CENTER
@@ -39,10 +42,10 @@ class AspectRatioPlugin : IPlugin {
         imageCapture: ImageCapture.Builder
     ): ImageCapture.Builder {
         // TODO "FULL" aspect ratio isn't cropping on image capture
-        val ratioStr = viewModel.getSetting<String>("aspectRatio") ?: "16:9"
+        val ratioStr = viewModel.getSetting<TranslatableString>("aspectRatio") ?: "16:9".i18n()
         val context = MyApplication.getAppContext()
 
-        val ratioOrNull = parseRatioOrNull(ratioStr)
+        val ratioOrNull = parseRatioOrNull(ratioStr.resolve())
 
         val targetSize = if (ratioOrNull == null) {
             getLargestSensorSize(viewModel.camera!!, context)
@@ -60,10 +63,10 @@ class AspectRatioPlugin : IPlugin {
         viewModel: StoneCameraViewModel,
         preview: Preview.Builder
     ): Preview.Builder {
-        val ratioStr = viewModel.getSetting<String>("aspectRatio") ?: "16:9"
+        val ratioStr = viewModel.getSetting<TranslatableString>("aspectRatio") ?: "16:9".i18n()
 
         val context = MyApplication.getAppContext()
-        val ratioOrNull = parseRatioOrNull(ratioStr)
+        val ratioOrNull = parseRatioOrNull(ratioStr.resolve())
 
         // 1) Figure out the best "preferred size" for this ratio
         val targetSize = if (ratioOrNull == null) {
@@ -151,8 +154,8 @@ class AspectRatioPlugin : IPlugin {
         viewModel: StoneCameraViewModel,
         previewView: PreviewView
     ): PreviewView {
-        val aspectRatio = viewModel.getSetting<String>("aspectRatio")
-        if (aspectRatio == "FULL") {
+        val aspectRatio = viewModel.getSetting<TranslatableString>("aspectRatio")
+        if (aspectRatio?.resolve() == "FULL") {
             previewView.scaleType = PreviewView.ScaleType.FILL_CENTER
         } else {
             previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
@@ -171,11 +174,11 @@ class AspectRatioPlugin : IPlugin {
         listOf(
             PluginSetting.EnumSetting(
                 key = "aspectRatio",
-                defaultValue = "16:9",
-                options = listOf("16:9", "4:3", "FULL"),
+                defaultValue = @Translatable "16:9".i18n(),
+                options = listOf(@Translatable "16:9".i18n(), @Translatable "4:3".i18n(), @Translatable "FULL".i18n()),
                 render = { value, isSelected ->
                     Text(
-                        text = value,
+                        text = value.resolve(),
                         color = if (isSelected) Color(0xFFFFCC00) else Color.White,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
@@ -183,9 +186,9 @@ class AspectRatioPlugin : IPlugin {
                             .padding(8.dp)
                     )
                 },
-                onChange = { viewModel, value ->
+                onChange = { viewModel, _ ->
                     val previewView = viewModel.previewView
-                    if (viewModel.getSetting<String>("aspectRatio") === "FULL") {
+                    if (viewModel.getSetting<TranslatableString>("aspectRatio")?.resolve() === "FULL") {
                         previewView!!.scaleType = PreviewView.ScaleType.FILL_CENTER
                     } else {
                         previewView!!.scaleType = PreviewView.ScaleType.FIT_CENTER
@@ -193,7 +196,7 @@ class AspectRatioPlugin : IPlugin {
                     viewModel.recreateUseCases()
                 },
                 renderLocation = SettingLocation.TOP,
-                label = "Aspect Ratio"
+                label = @Translatable "Aspect Ratio".i18n()
             )
         )
     }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.plugins.PluginSetting
+import co.stonephone.stonecamera.utils.TranslatableString
 
 @Composable
 fun RenderPluginSetting(
@@ -16,14 +17,19 @@ fun RenderPluginSetting(
     val value = viewModel.settings[setting.key] ?: setting.defaultValue
     when (setting) {
         is PluginSetting.EnumSetting -> {
+            val _value = when (value) {
+                is TranslatableString -> value
+                else -> TranslatableString(value.toString())
+            }
+
             Box(modifier = Modifier
                 .then(modifier)
                 .clickable {
-                    val currentIndex = setting.options.indexOf(value)
+                    val currentIndex = setting.options.indexOf(_value)
                     val nextIndex = (currentIndex + 1) % setting.options.size
                     viewModel.setSetting(setting.key, setting.options[nextIndex])
                 }) {
-                setting.render(value as String, false)
+                setting.render(_value, false)
             }
         }
 
@@ -37,8 +43,8 @@ fun RenderPluginSetting(
             )
         }
 
-        is PluginSetting.CustomSetting -> setting.customRender(viewModel, value, { value ->
+        is PluginSetting.CustomSetting -> setting.customRender(viewModel, value) { value ->
             viewModel.setSetting(setting.key, value)
-        })
+        }
     }
 }

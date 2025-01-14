@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.utils.Translatable
+import co.stonephone.stonecamera.utils.TranslatableString
+import co.stonephone.stonecamera.utils.i18n
 
 class FlashPlugin : IPlugin {
     override val id: String = "flashPlugin"
@@ -26,8 +29,8 @@ class FlashPlugin : IPlugin {
     override fun onImageCapture(
         viewModel: StoneCameraViewModel, imageCapture: ImageCapture.Builder
     ): ImageCapture.Builder {
-        val flashMode = viewModel.getSetting<String>("flash") ?: "OFF"
-        val mode = flashModeStringToMode(flashMode)
+        val flashMode = viewModel.getSetting<TranslatableString>("flash") ?: "OFF".i18n()
+        val mode = flashModeStringToMode(flashMode.resolve())
         imageCapture.setFlashMode(mode)
         return imageCapture
     }
@@ -48,26 +51,30 @@ class FlashPlugin : IPlugin {
         listOf(
             PluginSetting.EnumSetting(
                 key = "flash",
-                label = "Flash",
-                defaultValue = "OFF",
-                options = listOf("OFF", "ON", "AUTO"),
+                label = @Translatable "Flash".i18n(),
+                defaultValue = @Translatable "OFF".i18n(),
+                options = listOf(
+                    @Translatable "OFF".i18n(),
+                    @Translatable "ON".i18n(),
+                    @Translatable "AUTO".i18n()
+                ),
                 render = { flashMode, isSelected ->
                     Box(
                         modifier = Modifier.padding(8.dp)
                     ) {
                         Icon(
                             imageVector = when (flashMode) {
-                                "OFF" -> Icons.Default.FlashOff // Replace with your preferred icon
-                                "ON" -> Icons.Default.FlashOn
-                                "AUTO" -> Icons.Default.FlashAuto // You may need to add custom icons for Flash Auto
+                                "OFF".i18n() -> Icons.Default.FlashOff // Replace with your preferred icon
+                                "ON".i18n() -> Icons.Default.FlashOn
+                                "AUTO".i18n() -> Icons.Default.FlashAuto // You may need to add custom icons for Flash Auto
                                 else -> {
                                     Icons.Default.FlashOff
                                 }
                             },
                             contentDescription = when (flashMode) {
-                                "OFF" -> "Flash Off"
-                                "ON" -> "Flash On"
-                                "AUTO" -> "Flash Auto"
+                                "OFF".i18n() -> @Translatable "Flash Off".i18n().resolve()
+                                "ON".i18n() -> @Translatable "Flash On".i18n().resolve()
+                                "AUTO".i18n() -> @Translatable "Flash Auto".i18n().resolve()
                                 else -> {
                                     "Flash"
                                 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">nombre_de_la_aplicación</string>
+    <string name="Flash">Flash</string>
+    <string name="OFF">APAGADO</string>
+    <string name="ON">ENCENDIDO</string>
+    <string name="AUTO">AUTO</string>
+    <string name="Flash_Off">Flash Apagado</string>
+    <string name="Flash_On">Flash Encendido</string>
+    <string name="Flash_Auto">Flash Auto</string>
+    <string name="_16_9">16:9</string>
+    <string name="_4_3">4:3</string>
+    <string name="FULL">Completo</string>
+    <string name="Aspect_Ratio">Relación de Aspecto</string>
+    <string name="Zoom">Zoom</string>
+    <string name="Capture">Capturar</string>
+    <string name="Smart">Inteligente</string>
+    <string name="Volume_Control_Mode">Modo de Control de Volumen</string>
+    <string name="video">video</string>
+    <string name="QR_Scanner">Escáner QR</string>
+</resources>

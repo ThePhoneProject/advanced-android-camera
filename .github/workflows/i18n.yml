@@ -1,0 +1,73 @@
+name: Generate Translations
+
+on:
+  push:
+    branches:
+      - main
+      - '**'  # just for testing this pr itself
+
+jobs:
+  generate-translations:
+    name: Update and Generate Translations
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch full history for creating PRs
+
+    # Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+          cache-read-only: false
+
+      # Cache Gradle dependencies
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Update Strings XML
+        run: ./gradlew updateStringsXml
+
+      - name: Generate Translations
+        run: ./gradlew generateTranslations
+
+      - name: Check for changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Changes detected."
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git checkout -b update-translations
+            git add .
+            git commit -m "Update translations"
+          else
+            echo "No changes detected."
+            echo "::set-output name=changes::false"
+          fi
+        id: changes-check
+
+      - name: Create Pull Request
+        if: steps.changes-check.outputs.changes != 'false'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: update-translations
+          title: "Update Translations"
+          body: |
+            This PR updates the translations by running `./gradlew updateStringsXml` and `./gradlew generateTranslations`.
+          labels: |
+            translations

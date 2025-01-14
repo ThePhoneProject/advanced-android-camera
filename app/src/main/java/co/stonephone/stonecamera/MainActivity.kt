@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import co.stonephone.stonecamera.utils.TranslationManager
 
 class MainActivity : ComponentActivity() {
 
@@ -42,6 +43,8 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        TranslationManager.loadTranslationsForLocale(applicationContext)
 
         if (!isChromeOS()) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT

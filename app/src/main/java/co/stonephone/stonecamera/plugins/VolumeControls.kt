@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.utils.Translatable
+import co.stonephone.stonecamera.utils.TranslatableString
+import co.stonephone.stonecamera.utils.i18n
 
 class VolumeControlsPlugin : IPlugin {
     override val id: String = "volumeControlsPlugin"
@@ -35,9 +38,9 @@ class VolumeControlsPlugin : IPlugin {
         activity?.let {
             it.window.callback = object : android.view.Window.Callback by it.window.callback {
                 override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-                    val controlModeGet = viewModel.getSetting<String>("volumeControlMode")
+                    val controlModeGet = viewModel.getSetting<TranslatableString>("volumeControlMode")
 
-                    if (isZoomMode || controlModeGet == "Zoom") {
+                    if (isZoomMode || controlModeGet?.resolve() == "Zoom") {
                         clearValueRunnable?.let { handler.removeCallbacks(it) }
 
                         clearValueRunnable = Runnable {
@@ -89,12 +92,16 @@ class VolumeControlsPlugin : IPlugin {
             listOf(
                 PluginSetting.EnumSetting(
                     key = "volumeControlMode",
-                    options = listOf("Zoom", "Capture", "Smart"),
-                    defaultValue = "Smart",
+                    options = listOf(
+                        @Translatable "Zoom".i18n(),
+                        @Translatable "Capture".i18n(),
+                        @Translatable "Smart".i18n()
+                    ),
+                    defaultValue = @Translatable "Smart".i18n(),
                     renderLocation = SettingLocation.NONE,
                     render = { value, isSelected ->
                         Text(
-                            value.uppercase(), 
+                            value.resolve().uppercase(),
                             color = if (isSelected) Color(0xFFFFCC00) else Color.White,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
@@ -105,7 +112,7 @@ class VolumeControlsPlugin : IPlugin {
                     onChange = { viewModel, value ->
                         // NOOP
                     },
-                    label = "Volume Control Mode"
+                    label = @Translatable "Volume Control Mode".i18n()
                 )
             )
         }

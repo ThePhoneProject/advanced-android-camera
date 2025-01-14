@@ -8,6 +8,7 @@ import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.utils.TranslatableString
 import kotlinx.coroutines.CompletableDeferred
 
 // PluginUseCase Enum ("photo", "analysis", "video")
@@ -27,7 +28,7 @@ interface IPlugin {
         return true
     }
 
-    val modeLabel: String?
+    val modeLabel: TranslatableString?
         get() = null
 
     val renderModeControl: @Composable() (() -> Unit)?
@@ -60,8 +61,8 @@ interface IPlugin {
 
     fun onModeSelected(
         viewModel: StoneCameraViewModel,
-        previousMode: String,
-        nextMode: String
+        previousMode: TranslatableString,
+        nextMode: TranslatableString
     ): Unit {
 
     }
@@ -114,19 +115,19 @@ enum class SettingLocation {
 sealed class PluginSetting(
     val key: String,
     val defaultValue: Any?,
-    val label: String,
+    val label: TranslatableString,
     val onChange: (StoneCameraViewModel, Any?) -> Unit,
     val renderLocation: SettingLocation? = SettingLocation.NONE,
 ) {
 
     class EnumSetting(
         key: String,
-        defaultValue: String,
-        label: String,
+        defaultValue: TranslatableString,
+        label: TranslatableString,
         renderLocation: SettingLocation? = SettingLocation.NONE,
-        val options: List<String>,
-        val render: @Composable (value: String, Boolean) -> Unit,
-        onChange: (StoneCameraViewModel, String) -> Unit
+        val options: List<TranslatableString>,
+        val render: @Composable (value: TranslatableString, Boolean) -> Unit,
+        onChange: (StoneCameraViewModel, TranslatableString?) -> Unit
     ) : PluginSetting(
         key,
         defaultValue,
@@ -139,7 +140,7 @@ sealed class PluginSetting(
         key: String,
         defaultValue: Float,
         renderLocation: SettingLocation? = SettingLocation.NONE,
-        label: String,
+        label: TranslatableString,
         val minValue: Float,
         val maxValue: Float,
         val stepValue: Float? = null,
@@ -155,7 +156,7 @@ sealed class PluginSetting(
     class CustomSetting(
         key: String,
         defaultValue: String,
-        label: String,
+        label: TranslatableString,
         renderLocation: SettingLocation? = SettingLocation.NONE,
         val customRender: @Composable (StoneCameraViewModel, Any?, (Any?) -> Unit) -> Unit, // Render function with a callback for value changes
         onChange: (StoneCameraViewModel, Any?) -> Unit

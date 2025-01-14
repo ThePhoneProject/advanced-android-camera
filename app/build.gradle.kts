@@ -1,3 +1,10 @@
+import org.w3c.dom.Element
+import java.io.FileNotFoundException
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)

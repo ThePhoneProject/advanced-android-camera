@@ -26,6 +26,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.ResponsiveOrientation
+import co.stonephone.stonecamera.utils.Translatable
+import co.stonephone.stonecamera.utils.TranslatableString
+import co.stonephone.stonecamera.utils.i18n
 
 class VideoModePlugin : IPlugin {
     override val id: String = "videoMode"
@@ -35,8 +38,8 @@ class VideoModePlugin : IPlugin {
 
     override fun onModeSelected(
         viewModel: StoneCameraViewModel,
-        previousMode: String,
-        nextMode: String
+        previousMode: TranslatableString,
+        nextMode: TranslatableString
     ) {
         if (previousMode == modeLabel) {
             viewModel.stopRecording()
@@ -47,7 +50,7 @@ class VideoModePlugin : IPlugin {
         get() = listOf(PluginUseCase.VIDEO, PluginUseCase.PHOTO, PluginUseCase.ANALYSIS)
 
     override val modeLabel
-        get() = "video"
+        get() = @Translatable "video".i18n()
 
     override val renderModeControl
         get() = @Composable {

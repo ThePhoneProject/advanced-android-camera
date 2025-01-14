@@ -42,6 +42,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.utils.Translatable
+import co.stonephone.stonecamera.utils.TranslatableString
+import co.stonephone.stonecamera.utils.i18n
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -62,7 +65,7 @@ class QRScannerPlugin : IPlugin {
     override fun initialize(viewModel: StoneCameraViewModel) {
         value = null
         scanner = BarcodeScanning.getClient()
-        qrScannerEnabled = viewModel.getSetting<String>("qrScannerEnabled").toString()
+        qrScannerEnabled = viewModel.getSetting<TranslatableString>("qrScannerEnabled")?.resolve() ?: "ON"
     }
 
     var width = 0f
@@ -193,12 +196,12 @@ class QRScannerPlugin : IPlugin {
         listOf(
             PluginSetting.EnumSetting(
                 key = "qrScannerEnabled",
-                label = "QR Scanner",
-                defaultValue = "ON",
-                options = listOf("ON", "OFF"),
+                label = @Translatable "QR Scanner".i18n(),
+                defaultValue = @Translatable "ON".i18n(),
+                options = listOf(@Translatable "ON".i18n(), @Translatable "OFF".i18n()),
                 render = { value, isSelected ->
                     Text(
-                        text = value,
+                        text = value.resolve(),
                         color = if (isSelected) Color(0xFFFFCC00) else Color.White,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,

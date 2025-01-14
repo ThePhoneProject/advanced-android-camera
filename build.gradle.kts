@@ -1,3 +1,4 @@
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     // Versions plugin, etc. as needed
@@ -9,5 +10,15 @@ plugins {
 }
 
 tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
+    delete(layout.buildDirectory.get().asFile)
+}
+
+// Register the task in the build script
+tasks.register<ExtractTranslatableStringsTask>("updateStringsXml") {
+    sourceDir.set(file("app/src/main/java"))
+    stringsFile.set(file("app/src/main/res/values/strings.xml"))
+}
+
+tasks.register<GenerateTranslationsTask>("generateTranslations") {
+    resDir.set(file("app/src/main/res"))
 }
