@@ -28,7 +28,10 @@ import co.stonephone.stonecamera.plugins.IPlugin
 import co.stonephone.stonecamera.plugins.PluginSetting
 import co.stonephone.stonecamera.plugins.PluginUseCase
 import co.stonephone.stonecamera.utils.StoneCameraInfo
+import co.stonephone.stonecamera.utils.Translatable
+import co.stonephone.stonecamera.utils.TranslatableString
 import co.stonephone.stonecamera.utils.createCameraSelectorForId
+import co.stonephone.stonecamera.utils.i18n
 import co.stonephone.stonecamera.utils.selectCameraForStepZoomLevel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -74,7 +77,8 @@ class StoneCameraViewModel(
     var isPaused by mutableStateOf(false)
         private set
 
-    var selectedMode by mutableStateOf("photo")
+    @Translatable
+    var selectedMode by mutableStateOf("photo".i18n())
         private set
 
     private val _plugins = mutableListOf<IPlugin>()
@@ -189,7 +193,7 @@ class StoneCameraViewModel(
 
         @Suppress("UNCHECKED_CAST")
         return when (defaultValue) {
-            is String -> prefs.getString(settingKey, defaultValue) as? T
+            is TranslatableString -> prefs.getString(settingKey, defaultValue.resolve()) as? T
             is Float -> prefs.getFloat(settingKey, defaultValue) as? T
             else -> null
         }
@@ -197,8 +201,17 @@ class StoneCameraViewModel(
 
     // Retrieve a setting with automatic recomposition support
     fun <T> getSetting(settingKey: String): T? {
+        val _value = settings[settingKey]
+
+        val value = when (_value) {
+            is TranslatableString -> _value
+            is String -> _value.i18n()
+            is Float -> prefs.getFloat(settingKey, _value)
+            else -> null
+        }
+
         @Suppress("UNCHECKED_CAST")
-        return settings[settingKey] as? T
+        return value as? T
     }
 
     // Update a setting and notify observers
@@ -207,7 +220,7 @@ class StoneCameraViewModel(
 
         when (setting) {
             is PluginSetting.EnumSetting -> {
-                prefs.edit().putString(settingKey, value as String).apply()
+                prefs.edit().putString(settingKey, (value as TranslatableString).raw).apply()
             }
 
             is PluginSetting.ScalarSetting -> {
@@ -262,7 +275,7 @@ class StoneCameraViewModel(
     /**
      * Switch between Photo and Video modes.
      */
-    fun selectMode(mode: String) {
+    fun selectMode(mode: TranslatableString) {
         plugins.forEach {
             it.onModeSelected(this, selectedMode, mode)
         }
@@ -462,7 +475,6 @@ class StoneCameraViewModel(
                         try {
                             // Await all work to finish
                             workList.awaitAll()
-                            Log.d("Analyzer", "All plugins completed successfully")
                         } catch (e: Exception) {
                             Log.e("Analyzer", "Error in one or more plugins", e)
                         } finally {

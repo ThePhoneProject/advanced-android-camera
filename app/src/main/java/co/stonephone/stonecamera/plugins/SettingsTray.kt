@@ -81,7 +81,7 @@ class SettingsTrayPlugin : IPlugin {
                                         viewModel.getSetting(setting.key) ?: setting.defaultValue
 
                                     Text(
-                                        text = setting.label,
+                                        text = setting.label.resolve(),
                                         color = Color.White,
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold,
@@ -104,7 +104,9 @@ class SettingsTrayPlugin : IPlugin {
                                                                 setting.key, option
                                                             )
                                                         }) {
-                                                        setting.render(option, option == value)
+                                                        setting.render(
+                                                            option, option == value
+                                                        )
                                                     }
                                                 }
                                             }

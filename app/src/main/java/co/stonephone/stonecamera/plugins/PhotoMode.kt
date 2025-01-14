@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.ResponsiveOrientation
+import co.stonephone.stonecamera.utils.i18n
 
 class PhotoModePlugin : IPlugin {
     override val id: String = "photoMode"
@@ -34,7 +35,7 @@ class PhotoModePlugin : IPlugin {
         get() = listOf(PluginUseCase.PHOTO, PluginUseCase.ANALYSIS, PluginUseCase.VIDEO)
 
     override val modeLabel
-        get() = "photo"
+        get() = "photo".i18n()
 
     override val renderModeControl
         get() = @Composable {

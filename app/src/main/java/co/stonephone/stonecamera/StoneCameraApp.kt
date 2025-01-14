@@ -1,23 +1,15 @@
 // StoneCameraApp.kt
-@file:kotlin.OptIn(ExperimentalMaterial3Api::class)
-
 package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
 import android.graphics.Rect
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -185,8 +177,8 @@ fun StoneCameraApp(
                     ) {
                         modePlugins.forEach { modePlugin ->
                             val modeLabel = modePlugin.modeLabel!!
-                            Text(text = modeLabel.uppercase(),
-                                color = if (modeLabel == selectedMode) Color(0xFFFFCC00) else Color.White,
+                            Text(text = modeLabel.resolve().uppercase(),
+                                color = if (modeLabel.resolve() == selectedMode.resolve()) Color(0xFFFFCC00) else Color.White,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {

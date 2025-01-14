@@ -1,3 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="app_name">StoneCamera</string>
+        
+    <string name="app_name" unused="true">app_name</string>
+
+    <string name="Flash">Flash</string>
+    <string name="OFF">OFF</string>
+    <string name="ON">ON</string>
+    <string name="AUTO">AUTO</string>
+    <string name="Flash_Off">Flash Off</string>
+    <string name="Flash_On">Flash On</string>
+    <string name="Flash_Auto">Flash Auto</string>
+    <string name="_16_9">16:9</string>
+    <string name="_4_3">4:3</string>
+    <string name="FULL">FULL</string>
+    <string name="Aspect_Ratio">Aspect Ratio</string>
+    <string name="Zoom">Zoom</string>
+    <string name="Capture">Capture</string>
+    <string name="Smart">Smart</string>
+    <string name="Volume_Control_Mode">Volume Control Mode</string>
+    <string name="video">video</string>
+    <string name="QR_Scanner">QR Scanner</string>
 </resources>
