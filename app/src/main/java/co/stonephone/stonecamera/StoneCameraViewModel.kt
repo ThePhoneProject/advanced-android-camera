@@ -193,7 +193,7 @@ class StoneCameraViewModel(
 
         @Suppress("UNCHECKED_CAST")
         return when (defaultValue) {
-            is TranslatableString -> (prefs.getString(settingKey, defaultValue.resolve())) as? T
+            is TranslatableString -> prefs.getString(settingKey, defaultValue.resolve()) as? T
             is Float -> prefs.getFloat(settingKey, defaultValue) as? T
             else -> null
         }
