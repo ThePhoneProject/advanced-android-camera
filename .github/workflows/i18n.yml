@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - '**'  # just for testing this pr itself
 
 jobs:
   generate-translations:
@@ -44,30 +43,18 @@ jobs:
         run: ./gradlew updateStringsXml
 
       - name: Generate Translations
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: ./gradlew generateTranslations
-
-      - name: Check for changes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "Changes detected."
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git checkout -b update-translations
-            git add .
-            git commit -m "Update translations"
-          else
-            echo "No changes detected."
-            echo "::set-output name=changes::false"
-          fi
-        id: changes-check
 
       - name: Create Pull Request
         if: steps.changes-check.outputs.changes != 'false'
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: update-translations
-          title: "Update Translations"
-          body: |
-            This PR updates the translations by running `./gradlew updateStringsXml` and `./gradlew generateTranslations`.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Update Translations ${{ github.event.pull_request.number }}"
+          body: "Update Translations ${{ github.event.pull_request.number }}"
+          branch: i18n-${{ github.event.pull_request.number }}
+          base: main
           labels: |
             translations
