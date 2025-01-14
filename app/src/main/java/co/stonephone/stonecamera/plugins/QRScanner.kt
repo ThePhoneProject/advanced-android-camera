@@ -19,6 +19,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
@@ -75,7 +76,8 @@ class QRScannerPlugin : IPlugin {
         return Box(
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                // TODO move to a configurable model for plugin render location
+                .offset(y = -48.dp)
                 .onGloballyPositioned { layoutCoordinates ->
                     width = layoutCoordinates.size.width.toFloat()
                 }

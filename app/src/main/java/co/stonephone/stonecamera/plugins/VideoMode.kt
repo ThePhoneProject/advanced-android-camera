@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.ui.ResponsiveOrientation
 
 class VideoModePlugin : IPlugin {
     override val id: String = "videoMode"
@@ -62,79 +63,85 @@ class VideoModePlugin : IPlugin {
             ) {
                 // Camera Switcher Button
                 if (isRecording) {
-                    IconButton(
-                        onClick = {
+                    ResponsiveOrientation {
+                        IconButton(
+                            onClick = {
+                                if (isPaused) {
+                                    viewModel.resumeRecording()
+                                } else {
+                                    viewModel.pauseRecording()
+                                }
+                            },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .padding(8.dp)
+                                .border(1.dp, Color.White, CircleShape)
+                                .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
+                        ) {
                             if (isPaused) {
-                                viewModel.resumeRecording()
+                                Icon(
+                                    imageVector = Icons.Filled.PlayArrow,
+                                    contentDescription = "Resume Recording",
+                                    tint = Color.White,
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             } else {
-                                viewModel.pauseRecording()
+                                Icon(
+                                    imageVector = Icons.Filled.Pause,
+                                    contentDescription = "Pause Recording",
+                                    tint = Color.White,
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             }
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
-                            .border(1.dp, Color.White, CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
-                    ) {
-                        if (isPaused) {
-                            Icon(
-                                imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = "Resume Recording",
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.Pause,
-                                contentDescription = "Pause Recording",
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize()
-                            )
                         }
                     }
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.Transparent, shape = CircleShape)
-                            .clickable {
-                                viewModel.toggleCameraFacing()
-                            }, contentAlignment = Alignment.Center
-                    ) {
-
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .border(1.dp, Color.White, CircleShape)
-                        .padding(4.dp), contentAlignment = Alignment.Center
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier
-                        .background(
-                            Color.Red, shape = if (!isRecording) CircleShape else RectangleShape
-                        )
-                        .fillMaxSize(if (!isRecording) 1f else 0.5f)
-                        .clickable {
-                            if (!isRecording) {
-                                // Start recording
-                                viewModel.startRecording(
-                                    viewModel.videoCapture
-                                ) { uri ->
-                                    Log.d(
-                                        "StoneCameraApp", "Video saved to: $uri"
-                                    )
-                                }
-                            } else {
-                                // Stop recording
-                                viewModel.stopRecording()
-                            }
+                    ResponsiveOrientation {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(Color.Transparent, shape = CircleShape)
+                                .clickable {
+                                    viewModel.toggleCameraFacing()
+                                }, contentAlignment = Alignment.Center
+                        ) {
 
                         }
+                    }
+                }
+                ResponsiveOrientation {
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .border(1.dp, Color.White, CircleShape)
+                            .padding(4.dp), contentAlignment = Alignment.Center
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier
+                            .background(
+                                Color.Red,
+                                shape = if (!isRecording) CircleShape else RectangleShape
+                            )
+                            .fillMaxSize(if (!isRecording) 1f else 0.5f)
+                            .clickable {
+                                if (!isRecording) {
+                                    // Start recording
+                                    viewModel.startRecording(
+                                        viewModel.videoCapture
+                                    ) { uri ->
+                                        Log.d(
+                                            "StoneCameraApp", "Video saved to: $uri"
+                                        )
+                                    }
+                                } else {
+                                    // Stop recording
+                                    viewModel.stopRecording()
+                                }
+
+                            }
 
 
-                    ) {}
+                        ) {}
+                    }
                 }
 
                 if (isRecording) {
@@ -160,20 +167,22 @@ class VideoModePlugin : IPlugin {
                                 }) {}
                     }
                 } else {
-                    // Camera Switcher Button
-                    IconButton(
-                        onClick = { viewModel.toggleCameraFacing() },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
-                            .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.FlipCameraAndroid, // Use FlipCameraAndroid if preferred
-                            contentDescription = "Flip Camera",
-                            tint = Color.White, // Customize the color if needed
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    ResponsiveOrientation {
+                        // Camera Switcher Button
+                        IconButton(
+                            onClick = { viewModel.toggleCameraFacing() },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .padding(8.dp)
+                                .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.FlipCameraAndroid, // Use FlipCameraAndroid if preferred
+                                contentDescription = "Flip Camera",
+                                tint = Color.White, // Customize the color if needed
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
             }

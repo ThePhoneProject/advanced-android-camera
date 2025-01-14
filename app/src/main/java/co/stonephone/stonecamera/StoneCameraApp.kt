@@ -43,6 +43,7 @@ import co.stonephone.stonecamera.plugins.VideoModePlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
 import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
+import co.stonephone.stonecamera.ui.ResponsiveOrientation
 import co.stonephone.stonecamera.ui.StoneCameraPreview
 import co.stonephone.stonecamera.utils.calculateImageCoverageRegion
 import co.stonephone.stonecamera.utils.getAllCamerasInfo
@@ -127,9 +128,11 @@ fun StoneCameraApp(
         ) {
             stoneCameraViewModel.pluginSettings.filter { it.renderLocation == SettingLocation.TOP }
                 .map { setting ->
-                    RenderPluginSetting(
-                        setting, stoneCameraViewModel, modifier = Modifier.padding(4.dp)
-                    )
+                    ResponsiveOrientation {
+                        RenderPluginSetting(
+                            setting, stoneCameraViewModel, modifier = Modifier.padding(4.dp)
+                        )
+                    }
                 }
         }
 
@@ -191,7 +194,7 @@ fun StoneCameraApp(
                                 })
                         }
                     }
-                    
+
                     activeModePlugin?.renderModeControl?.invoke()
                 }
             }
