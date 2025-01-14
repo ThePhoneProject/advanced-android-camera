@@ -83,6 +83,9 @@ dependencies {
 
     // ML Kit for Barcode/QR scanning
     implementation(libs.barcode.scanning)
+
+    //Mediapipe for segmentation (portrait)
+    implementation("com.google.mediapipe:tasks-vision:latest.release")
 }
 
 
