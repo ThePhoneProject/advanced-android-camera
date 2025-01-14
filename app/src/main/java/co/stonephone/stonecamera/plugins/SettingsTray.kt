@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.ui.ResponsiveOrientation
 import kotlinx.coroutines.launch
 
 class SettingsTrayPlugin : IPlugin {
@@ -141,23 +142,25 @@ class SettingsTrayPlugin : IPlugin {
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = {
-                    showSettingsTray = true
-                },
-                modifier = Modifier
-                    .size(36.dp)
-                    .background(
-                        Color.White.copy(alpha = 0.1f), CircleShape
+            ResponsiveOrientation {
+                IconButton(
+                    onClick = {
+                        showSettingsTray = true
+                    },
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            Color.White.copy(alpha = 0.1f), CircleShape
+                        )
+                        .padding(8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings Tray",
+                        tint = Color.White,
+                        modifier = Modifier.fillMaxSize()
                     )
-                    .padding(8.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings Tray",
-                    tint = Color.White,
-                    modifier = Modifier.fillMaxSize()
-                )
+                }
             }
         }
     }

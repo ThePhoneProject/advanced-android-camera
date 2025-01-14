@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
+import co.stonephone.stonecamera.ui.ResponsiveOrientation
 
 class PhotoModePlugin : IPlugin {
     override val id: String = "photoMode"
@@ -75,20 +76,22 @@ class PhotoModePlugin : IPlugin {
                             }) {}
                 }
 
-                // Camera Switcher Button
-                IconButton(
-                    onClick = { viewModel.toggleCameraFacing() },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(8.dp)
-                        .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.FlipCameraAndroid, // Use FlipCameraAndroid if preferred
-                        contentDescription = "Flip Camera",
-                        tint = Color.White, // Customize the color if needed
-                        modifier = Modifier.fillMaxSize()
-                    )
+                ResponsiveOrientation {
+                    // Camera Switcher Button
+                    IconButton(
+                        onClick = { viewModel.toggleCameraFacing() },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(8.dp)
+                            .background(Color.White.copy(alpha = 0.1f), shape = CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FlipCameraAndroid, // Use FlipCameraAndroid if preferred
+                            contentDescription = "Flip Camera",
+                            tint = Color.White, // Customize the color if needed
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
