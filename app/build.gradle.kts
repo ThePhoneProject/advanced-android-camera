@@ -86,6 +86,7 @@ dependencies {
 
     //Mediapipe for segmentation (portrait)
     implementation("com.google.mediapipe:tasks-vision:latest.release")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android")
 }
 
 
