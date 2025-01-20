@@ -79,10 +79,12 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
     // Stolen from https://stackoverflow.com/questions/21418892/understanding-super-fast-blur-algorithm?fbclid=IwZXh0bgNhZW0CMTEAAR1w91ucNtw4nU-Z8Z9RyMYFVUHWxfgt7ivsE7foTkwR2wmdx2losQqQ0sk_aem_Zrf_8344PRxW6SFzutkE7g
     // Edited to apply the blur only on the mask
     fun fastBlur(original: Bitmap, mask: ByteBuffer, radius: Int): Bitmap {
-        val img = original.copy(original.config, true)
         if (radius < 1) {
-            return img
+            return original
         }
+
+        val img = original.copy(original.config, true)
+
         val w = img.width
         val h = img.height
         val wm = w - 1
@@ -107,6 +109,14 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         val vmax = IntArray(max(w.toDouble(), h.toDouble()).toInt())
         val pix = IntArray(w * h)
 
+        val intMask = IntArray(w * h);
+
+        var maskIndex = 0;
+        while (mask.hasRemaining()) {
+            intMask[maskIndex] = mask.get().toInt()
+            maskIndex += 1
+        }
+
         img.getPixels(pix, 0, w, 0, 0, w, h)
 
         val dv = IntArray(256 * div)
@@ -116,8 +126,7 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
             i++
         }
 
-        yi = 0
-        var yw = yi
+        var yw = 0.also { yi = it }
 
         y = 0
         while (y < h) {
@@ -173,8 +182,10 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
             yi = x
             y = 0
             while (y < h) {
-                if (mask.get().toInt() == 0) {
-                    pix[yi] = -0x1000000 or (dv[rsum] shl 16) or (dv[gsum] shl 8) or dv[bsum]
+                //TODO confirm what the mask values are (as could be multiple categories)
+                if (intMask[yi] != 0) {
+                    pix[yi] =
+                        -0x1000000 or (dv.get(rsum) shl 16) or (dv.get(gsum) shl 8) or dv.get(bsum)
                 }
                 if (x == 0) {
                     vmin[y] = (min((y + radius + 1).toDouble(), hm.toDouble()) * w).toInt()
