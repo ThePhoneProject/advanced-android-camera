@@ -17,6 +17,9 @@ import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.ByteBufferExtractor
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenterResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -50,23 +53,27 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         stoneCameraViewModel: StoneCameraViewModel,
         outputFileResults: ImageCapture.OutputFileResults
     ) {
-        val contentResolver: ContentResolver = MyApplication.getAppContext().contentResolver
-        val imageUri = outputFileResults.savedUri ?: return
+        CoroutineScope(Dispatchers.IO).launch {
 
-        // Open the input stream of the original image
-        val inputStream = contentResolver.openInputStream(imageUri)
-        val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+            val contentResolver: ContentResolver = MyApplication.getAppContext().contentResolver
+            val imageUri = outputFileResults.savedUri ?: return@launch
 
-        val segmentationResults: ImageSegmenterResult =
-            imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(bitmap).build()) ?: return
+            // Open the input stream of the original image
+            val inputStream = contentResolver.openInputStream(imageUri)
+            val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+            val segmentationResults: ImageSegmenterResult =
+                imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(bitmap).build())
+                    ?: return@launch
 
-        val categoryMask: ByteBuffer =
-            ByteBufferExtractor.extract(segmentationResults.categoryMask().get())
+            val categoryMask: ByteBuffer =
+                ByteBufferExtractor.extract(segmentationResults.categoryMask().get())
 
-        val blurred =
-            applyBlurBasedOnMask(MyApplication.getAppContext(), imageUri, categoryMask) ?: return
-        blurred.saveImage(MyApplication.getAppContext())
-        inputStream?.close()
+            val blurred =
+                applyBlurBasedOnMask(MyApplication.getAppContext(), imageUri, categoryMask)
+                    ?: return@launch
+            blurred.saveImage(MyApplication.getAppContext())
+            inputStream?.close()
+        }
     }
 
     // Stolen from https://stackoverflow.com/questions/21418892/understanding-super-fast-blur-algorithm?fbclid=IwZXh0bgNhZW0CMTEAAR1w91ucNtw4nU-Z8Z9RyMYFVUHWxfgt7ivsE7foTkwR2wmdx2losQqQ0sk_aem_Zrf_8344PRxW6SFzutkE7g
