@@ -65,6 +65,7 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
                 imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(bitmap).build())
                     ?: return@launch
 
+            // Blur mask edge with https://developer.android.com/reference/android/graphics/BlurMaskFilter
             val categoryMask: ByteBuffer =
                 ByteBufferExtractor.extract(segmentationResults.categoryMask().get())
 
