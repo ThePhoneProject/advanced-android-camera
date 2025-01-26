@@ -29,6 +29,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import java.util.Objects
 import kotlin.math.max
 import kotlin.math.min
 
@@ -58,6 +59,12 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         stoneCameraViewModel: StoneCameraViewModel,
         outputFileResults: ImageCapture.OutputFileResults
     ) {
+        val portraitModeSetting = stoneCameraViewModel.getSetting<String>("portraitMode") ?: "OFF"
+
+        if (Objects.equals(portraitModeSetting, "OFF")) {
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
 
             val contentResolver: ContentResolver = MyApplication.getAppContext().contentResolver
