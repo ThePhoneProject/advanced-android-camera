@@ -3,6 +3,7 @@ package co.stonephone.stonecamera.plugins
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import androidx.camera.core.ImageCapture
@@ -120,7 +121,7 @@ class PortraitModePlugin : IPlugin {
         if (rotation == 0) {
             return image;
         }
-        val matrix = android.graphics.Matrix().apply { postRotate(rotation.toFloat()) }
+        val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
         return Bitmap.createBitmap(
             image,
             0,
@@ -264,35 +265,38 @@ class PortraitModePlugin : IPlugin {
         return img
     }
 
-    override val settings: List<PluginSetting> = listOf(
-        PluginSetting.EnumSetting(
-            key = "portraitMode",
-            defaultValue = "OFF",
-            options = listOf("OFF", "ON"),
-            render = { isEnabled ->
-                Icon(
-                    imageVector = when (isEnabled) {
-                        "OFF" -> Icons.Default.PersonOff
-                        "ON" -> Icons.Default.Portrait
-                        else -> {
-                            Icons.Default.PersonOff
-                        }
-                    },
-                    contentDescription = when (isEnabled) {
-                        "OFF" -> "Portrait Mode Off"
-                        "ON" -> "Portrait Mode On"
-                        else -> {
-                            "Portrait Mode Off"
-                        }
-                    },
-                    tint = Color.White
-                )
+    override val settings: (StoneCameraViewModel) -> List<PluginSetting> = { viewModel ->
+        listOf(
+            PluginSetting.EnumSetting(
+                key = "portraitMode",
+                defaultValue = "OFF",
+                options = listOf("OFF", "ON"),
+                render = { isEnabled, isSelected ->
+                    Icon(
+                        imageVector = when (isEnabled) {
+                            "OFF" -> Icons.Default.PersonOff
+                            "ON" -> Icons.Default.Portrait
+                            else -> {
+                                Icons.Default.PersonOff
+                            }
+                        },
+                        contentDescription = when (isEnabled) {
+                            "OFF" -> "Portrait Mode Off"
+                            "ON" -> "Portrait Mode On"
+                            else -> {
+                                "Portrait Mode Off"
+                            }
+                        },
+                        tint = if (isSelected) Color(0xFFFFCC00) else Color.White
+                    )
 
-            },
-            onChange = { viewModel, value ->
-                viewModel.recreateUseCases()
-            },
-            renderLocation = SettingLocation.TOP
+                },
+                onChange = { viewModel, value ->
+                    viewModel.recreateUseCases()
+                },
+                renderLocation = SettingLocation.TOP,
+                label = "Portrait Mode"
+            )
         )
-    )
+    }
 }
