@@ -178,7 +178,7 @@ class PortraitModePlugin : IPlugin {
         val dv = IntArray(256 * div)
         i = 0
         while (i < 256 * div) {
-            dv[i] = (i / div)
+            dv[i] = i / div
             i++
         }
 
@@ -210,8 +210,8 @@ class PortraitModePlugin : IPlugin {
                 p1 = pix[yw + vmin[x]]
                 p2 = pix[yw + vmax[x]]
 
-                rsum += ((p1 and 0xff0000) - (p2 and 0xff0000)) shr 16
-                gsum += ((p1 and 0x00ff00) - (p2 and 0x00ff00)) shr 8
+                rsum += (p1 and 0xff0000) - (p2 and 0xff0000) shr 16
+                gsum += (p1 and 0x00ff00) - (p2 and 0x00ff00) shr 8
                 bsum += (p1 and 0x0000ff) - (p2 and 0x0000ff)
                 yi++
                 x++
