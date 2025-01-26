@@ -1,14 +1,10 @@
 package co.stonephone.stonecamera.plugins
 
 import android.content.ContentResolver
-import android.content.ContentValues
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.ExifInterface
 import android.net.Uri
-import android.os.Environment
-import android.os.SystemClock
-import android.provider.MediaStore
 import androidx.camera.core.ImageCapture
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonOff
@@ -24,9 +20,6 @@ import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenterResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.util.Objects
 import kotlin.math.max
@@ -38,8 +31,6 @@ class PortraitModePlugin : IPlugin {
 
     private lateinit var imageSegmenterHelper: ImageSegmenterHelper
 
-    // Note the various models available here: /home/izaak/Downloads/selfie_segmenter.tflite.
-
     override fun initialize(viewModel: StoneCameraViewModel) {
         imageSegmenterHelper = ImageSegmenterHelper(
             context = MyApplication.getAppContext(),
@@ -50,7 +41,6 @@ class PortraitModePlugin : IPlugin {
         imageSegmenterHelper.setupImageSegmenter()
     }
 
-    //TODO fix image rotation being incorrect after processing
     override fun onImageSaved(
         stoneCameraViewModel: StoneCameraViewModel,
         outputFileResults: ImageCapture.OutputFileResults
@@ -64,36 +54,82 @@ class PortraitModePlugin : IPlugin {
         CoroutineScope(Dispatchers.IO).launch {
 
             val contentResolver: ContentResolver = MyApplication.getAppContext().contentResolver
-            val imageUri = outputFileResults.savedUri ?: return@launch
+            val originalImageUri = outputFileResults.savedUri ?: return@launch
 
-            // Open the input stream of the original image
-            val inputStream = contentResolver.openInputStream(imageUri)
-            val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+            val originalImage: Bitmap = getOriginalImageBitmap(contentResolver, originalImageUri)
+            val rotation: Int = getOriginalImageRotation(contentResolver, originalImageUri)
+
             val segmentationResults: ImageSegmenterResult =
-                imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(bitmap).build())
+                imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(originalImage).build())
                     ?: return@launch
 
             // TODO Blur mask edge with https://developer.android.com/reference/android/graphics/BlurMaskFilter
-            val categoryMask: ByteBuffer =
+            val backgroundMask: ByteBuffer =
                 ByteBufferExtractor.extract(segmentationResults.categoryMask().get())
 
-            val blurred =
-                applyBlurBasedOnMask(MyApplication.getAppContext(), imageUri, categoryMask)
-                    ?: return@launch
-            blurred.saveImage(MyApplication.getAppContext())
-            inputStream?.close()
+            val blurredImage: Bitmap =
+                applyBlurBasedOnMask(originalImage, backgroundMask) ?: return@launch
+
+            val rotatedBitmap = matchOriginalImageRotation(blurredImage, rotation)
+
+            val outputStream = contentResolver.openOutputStream(originalImageUri, "w")
+            outputStream?.use {
+                rotatedBitmap.compress(
+                    Bitmap.CompressFormat.JPEG,
+                    100,
+                    it
+                )
+            }
         }
     }
 
-    private fun applyBlurBasedOnMask(context: Context, imageUri: Uri, categoryMask: ByteBuffer): Bitmap? {
-        // Step 1: Load the image from URI
-        val capturedImage = loadBitmapFromUri(context, imageUri) ?: return null
+    private fun getOriginalImageBitmap(contentResolver: ContentResolver, imageUri: Uri): Bitmap {
+        val inputStream = contentResolver.openInputStream(imageUri)
+        val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
 
-        categoryMask.rewind()  // Reset ByteBuffer position
+        return bitmap
+    }
 
-        val blurredBitmap = fastBlur(capturedImage, categoryMask, 25)
+    private fun getOriginalImageRotation(contentResolver: ContentResolver, imageUri: Uri): Int {
+        val exifInputStream = contentResolver.openInputStream(imageUri)
+        val exif = ExifInterface(exifInputStream!!)
+        val rotation = when (exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            else -> 0
+        }
+        exifInputStream.close()
+
+        return rotation
+    }
+
+    private fun applyBlurBasedOnMask(originalImage: Bitmap, categoryMask: ByteBuffer): Bitmap? {
+        categoryMask.rewind()
+
+        val blurredBitmap = fastBlur(originalImage, categoryMask, 25)
 
         return blurredBitmap
+    }
+
+    private fun matchOriginalImageRotation(image: Bitmap, rotation: Int): Bitmap {
+        if (rotation == 0) {
+            return image;
+        }
+        val matrix = android.graphics.Matrix().apply { postRotate(rotation.toFloat()) }
+        return Bitmap.createBitmap(
+            image,
+            0,
+            0,
+            image.width,
+            image.height,
+            matrix,
+            true
+        )
     }
 
     // Stolen from https://stackoverflow.com/questions/21418892/understanding-super-fast-blur-algorithm?fbclid=IwZXh0bgNhZW0CMTEAAR1w91ucNtw4nU-Z8Z9RyMYFVUHWxfgt7ivsE7foTkwR2wmdx2losQqQ0sk_aem_Zrf_8344PRxW6SFzutkE7g
@@ -226,66 +262,6 @@ class PortraitModePlugin : IPlugin {
         img.setPixels(pix, 0, w, 0, 0, w, h)
 
         return img
-    }
-
-    private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
-        try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            return BitmapFactory.decodeStream(inputStream)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-    }
-
-    private fun Bitmap.saveImage(context: Context): Uri? {
-        if (android.os.Build.VERSION.SDK_INT >= 29) {
-            val values = ContentValues()
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis() / 1000)
-            values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
-            values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/test_pictures")
-            values.put(MediaStore.Images.Media.IS_PENDING, true)
-            values.put(MediaStore.Images.Media.DISPLAY_NAME, "img_${SystemClock.uptimeMillis()}")
-
-            val uri: Uri? =
-                context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            if (uri != null) {
-                saveImageToStream(this, context.contentResolver.openOutputStream(uri))
-                values.put(MediaStore.Images.Media.IS_PENDING, false)
-                context.contentResolver.update(uri, values, null, null)
-                return uri
-            }
-        } else {
-            val directory =
-                File(
-                    context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                        .toString() + "_test_pictures"
-                )
-            if (!directory.exists()) {
-                directory.mkdirs()
-            }
-            val fileName = "img_${SystemClock.uptimeMillis()}" + ".jpeg"
-            val file = File(directory, fileName)
-            saveImageToStream(this, FileOutputStream(file))
-            val values = ContentValues()
-            values.put(MediaStore.Images.Media.DATA, file.absolutePath)
-            // .DATA is deprecated in API 29
-            context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            return Uri.fromFile(file)
-        }
-        return null
-    }
-
-    private fun saveImageToStream(bitmap: Bitmap, outputStream: OutputStream?) {
-        if (outputStream != null) {
-            try {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-                outputStream.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
     }
 
     override val settings: List<PluginSetting> = listOf(
