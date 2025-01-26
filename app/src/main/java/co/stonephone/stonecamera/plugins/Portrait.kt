@@ -20,7 +20,6 @@ import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.utils.ImageSegmenterHelper
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.ByteBufferExtractor
-import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenterResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +32,7 @@ import java.util.Objects
 import kotlin.math.max
 import kotlin.math.min
 
-
-class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
+class PortraitModePlugin : IPlugin {
     override val id: String = "portraitModePlugin"
     override val name: String = "Portrait Mode"
 
@@ -45,10 +43,8 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
     override fun initialize(viewModel: StoneCameraViewModel) {
         imageSegmenterHelper = ImageSegmenterHelper(
             context = MyApplication.getAppContext(),
-            runningMode = RunningMode.IMAGE,
             currentModel = ImageSegmenterHelper.MODEL_SELFIE_SEGMENTER,
             currentDelegate = ImageSegmenterHelper.DELEGATE_CPU,
-            imageSegmenterListener = this
         )
 
         imageSegmenterHelper.setupImageSegmenter()
@@ -77,7 +73,7 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
                 imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(bitmap).build())
                     ?: return@launch
 
-            // Blur mask edge with https://developer.android.com/reference/android/graphics/BlurMaskFilter
+            // TODO Blur mask edge with https://developer.android.com/reference/android/graphics/BlurMaskFilter
             val categoryMask: ByteBuffer =
                 ByteBufferExtractor.extract(segmentationResults.categoryMask().get())
 
@@ -89,9 +85,20 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         }
     }
 
+    private fun applyBlurBasedOnMask(context: Context, imageUri: Uri, categoryMask: ByteBuffer): Bitmap? {
+        // Step 1: Load the image from URI
+        val capturedImage = loadBitmapFromUri(context, imageUri) ?: return null
+
+        categoryMask.rewind()  // Reset ByteBuffer position
+
+        val blurredBitmap = fastBlur(capturedImage, categoryMask, 25)
+
+        return blurredBitmap
+    }
+
     // Stolen from https://stackoverflow.com/questions/21418892/understanding-super-fast-blur-algorithm?fbclid=IwZXh0bgNhZW0CMTEAAR1w91ucNtw4nU-Z8Z9RyMYFVUHWxfgt7ivsE7foTkwR2wmdx2losQqQ0sk_aem_Zrf_8344PRxW6SFzutkE7g
     // Edited to apply the blur only on the mask
-    fun fastBlur(original: Bitmap, mask: ByteBuffer, radius: Int): Bitmap {
+    private fun fastBlur(original: Bitmap, mask: ByteBuffer, radius: Int): Bitmap {
         if (radius < 1) {
             return original
         }
@@ -221,18 +228,7 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         return img
     }
 
-    fun applyBlurBasedOnMask(context: Context, imageUri: Uri, categoryMask: ByteBuffer): Bitmap? {
-        // Step 1: Load the image from URI
-        val capturedImage = loadBitmapFromUri(context, imageUri) ?: return null
-
-        categoryMask.rewind()  // Reset ByteBuffer position
-
-        val blurredBitmap = fastBlur(capturedImage, categoryMask, 25)
-
-        return blurredBitmap
-    }
-
-    fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
+    private fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
             return BitmapFactory.decodeStream(inputStream)
@@ -242,7 +238,7 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         }
     }
 
-    fun Bitmap.saveImage(context: Context): Uri? {
+    private fun Bitmap.saveImage(context: Context): Uri? {
         if (android.os.Build.VERSION.SDK_INT >= 29) {
             val values = ContentValues()
             values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
@@ -281,7 +277,7 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         return null
     }
 
-    fun saveImageToStream(bitmap: Bitmap, outputStream: OutputStream?) {
+    private fun saveImageToStream(bitmap: Bitmap, outputStream: OutputStream?) {
         if (outputStream != null) {
             try {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
@@ -323,12 +319,4 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
             renderLocation = SettingLocation.TOP
         )
     )
-
-    override fun onError(error: String, errorCode: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onResults(resultBundle: ImageSegmenterHelper.ResultBundle) {
-        TODO("Not yet implemented")
-    }
 }
