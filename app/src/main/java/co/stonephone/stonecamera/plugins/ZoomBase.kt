@@ -50,10 +50,7 @@ class ZoomBasePlugin : IPlugin {
 
             viewModel!!.setSelectedCamera(targetCamera.cameraId)
 
-
             camera?.cameraControl?.setZoomRatio(actualZoomRatio)
         }
     }
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }

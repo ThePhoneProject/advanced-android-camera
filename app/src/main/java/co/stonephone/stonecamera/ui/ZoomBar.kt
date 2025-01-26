@@ -143,16 +143,16 @@ fun ZoomBar(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (isActiveStop) "${formatZoom(relativeZoom)}×" else "${
-                            formatZoom(
+                    ResponsiveOrientation(content = { ->
+                        Text(
+                            text = if (isActiveStop) "${formatZoom(relativeZoom)}×" else formatZoom(
                                 roundedStop
-                            )
-                        }",
-                        color = if (isActiveStop) Color(0xFFFFCC00) else Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                            ),
+                            color = if (isActiveStop) Color(0xFFFFCC00) else Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    })
                 }
             }
         }

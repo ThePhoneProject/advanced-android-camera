@@ -84,24 +84,29 @@ class VolumeControlsPlugin : IPlugin {
 
     }
 
-    override val settings: List<PluginSetting> = listOf(
-        PluginSetting.EnumSetting(
-            key = "volumeControlMode",
-            options = listOf("Zoom", "Capture", "Smart"),
-            defaultValue = "Smart",
-            renderLocation = SettingLocation.TOP,
-            render = { value ->
-                Text(
-                    value.uppercase(), color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(8.dp)
+    override val settings: (StoneCameraViewModel) -> List<PluginSetting>
+        get() = {
+            listOf(
+                PluginSetting.EnumSetting(
+                    key = "volumeControlMode",
+                    options = listOf("Zoom", "Capture", "Smart"),
+                    defaultValue = "Smart",
+                    renderLocation = SettingLocation.NONE,
+                    render = { value, isSelected ->
+                        Text(
+                            value.uppercase(), 
+                            color = if (isSelected) Color(0xFFFFCC00) else Color.White,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(8.dp)
+                        )
+                    },
+                    onChange = { viewModel, value ->
+                        // NOOP
+                    },
+                    label = "Volume Control Mode"
                 )
-            },
-            onChange = { viewModel, value ->
-                // NOOP
-            }
-        )
-    )
+            )
+        }
 }

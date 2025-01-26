@@ -10,12 +10,10 @@ import co.stonephone.stonecamera.plugins.PluginSetting
 
 @Composable
 fun RenderPluginSetting(
-    setting: PluginSetting,
-    viewModel: StoneCameraViewModel,
-    modifier: Modifier = Modifier
+    setting: PluginSetting, viewModel: StoneCameraViewModel, modifier: Modifier = Modifier
     // TODO modes (e.g. compact: toggle in place, row: inform parent to hide others when active, full-row: always open)
 ) {
-    val value = viewModel.getSetting(setting.key) ?: setting.defaultValue
+    val value = viewModel.settings[setting.key] ?: setting.defaultValue
     when (setting) {
         is PluginSetting.EnumSetting -> {
             Box(modifier = Modifier
@@ -25,25 +23,22 @@ fun RenderPluginSetting(
                     val nextIndex = (currentIndex + 1) % setting.options.size
                     viewModel.setSetting(setting.key, setting.options[nextIndex])
                 }) {
-                setting.render(value as String)
+                setting.render(value as String, false)
             }
         }
 
         is PluginSetting.ScalarSetting -> {
             Slider(
-                value = value as Float,
-                onValueChange = { newValue ->
+                value = value as Float, onValueChange = { newValue ->
                     viewModel.setSetting(setting.key, newValue)
-                },
-                valueRange = setting.minValue..setting.maxValue,
+                }, valueRange = setting.minValue..setting.maxValue,
 //                steps = setting.stepValue?.toInt()
                 modifier = modifier
             )
         }
 
-        is PluginSetting.CustomSetting -> setting.customRender(viewModel,
-            value, { value ->
-                viewModel.setSetting(setting.key, value)
-            })
+        is PluginSetting.CustomSetting -> setting.customRender(viewModel, value, { value ->
+            viewModel.setSetting(setting.key, value)
+        })
     }
 }

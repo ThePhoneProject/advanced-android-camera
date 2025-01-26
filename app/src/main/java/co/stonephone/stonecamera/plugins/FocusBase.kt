@@ -54,6 +54,4 @@ class FocusBasePlugin : IPlugin {
         focusPointDp = null
         viewModel?.camera?.cameraControl?.cancelFocusAndMetering()
     }
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }

@@ -51,12 +51,10 @@ class DebugPlugin : IPlugin {
                     x = visibleRegion!!.left.dp,
                     y = visibleRegion!!.top.dp
                 )
-                .border(2.dp, Color.Yellow)
+                .border(2.dp, Color(0xAAFFCC00))
                 .padding(16.dp),
             contentAlignment = Alignment.TopCenter
         ) { }
 
     }
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }

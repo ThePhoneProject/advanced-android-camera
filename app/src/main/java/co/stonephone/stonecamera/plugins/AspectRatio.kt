@@ -1,6 +1,5 @@
 package co.stonephone.stonecamera.plugins
 
-import android.app.Application
 import android.util.Size
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.ImageCapture
@@ -14,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.MyApplication
@@ -169,32 +167,34 @@ class AspectRatioPlugin : IPlugin {
         return nums[0]!! / nums[1]!!
     }
 
-    override val settings: List<PluginSetting> = listOf(
-        PluginSetting.EnumSetting(
-            key = "aspectRatio",
-            defaultValue = "16:9",
-            options = listOf("16:9", "4:3", "FULL"),
-            render = { value ->
-                Text(
-                    text = value,
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(8.dp)
-                )
-            },
-            onChange = { viewModel, value ->
-                val previewView = viewModel.previewView
-                if (viewModel.getSetting<String>("aspectRatio") === "FULL") {
-                    previewView!!.scaleType = PreviewView.ScaleType.FILL_CENTER
-                } else {
-                    previewView!!.scaleType = PreviewView.ScaleType.FIT_CENTER
-                }
-                viewModel.recreateUseCases()
-
-            },
-            renderLocation = SettingLocation.TOP
+    override val settings = { viewModel: StoneCameraViewModel ->
+        listOf(
+            PluginSetting.EnumSetting(
+                key = "aspectRatio",
+                defaultValue = "16:9",
+                options = listOf("16:9", "4:3", "FULL"),
+                render = { value, isSelected ->
+                    Text(
+                        text = value,
+                        color = if (isSelected) Color(0xFFFFCC00) else Color.White,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(8.dp)
+                    )
+                },
+                onChange = { viewModel, value ->
+                    val previewView = viewModel.previewView
+                    if (viewModel.getSetting<String>("aspectRatio") === "FULL") {
+                        previewView!!.scaleType = PreviewView.ScaleType.FILL_CENTER
+                    } else {
+                        previewView!!.scaleType = PreviewView.ScaleType.FIT_CENTER
+                    }
+                    viewModel.recreateUseCases()
+                },
+                renderLocation = SettingLocation.TOP,
+                label = "Aspect Ratio"
+            )
         )
-    )
+    }
 }

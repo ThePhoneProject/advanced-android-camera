@@ -1,12 +1,10 @@
 package co.stonephone.stonecamera.plugins
 
 import android.annotation.SuppressLint
-import androidx.compose.ui.platform.LocalContext
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.ZoomBar
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 
@@ -29,7 +27,6 @@ class ZoomBarPlugin : IPlugin {
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             viewModel.camera?.let { cam ->
@@ -49,6 +46,4 @@ class ZoomBarPlugin : IPlugin {
     override fun initialize(viewModel: StoneCameraViewModel) {
 
     }
-
-    override val settings: List<PluginSetting> = emptyList() // No settings for tap-to-focus yet
 }
