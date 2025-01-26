@@ -10,6 +10,11 @@ import android.os.Environment
 import android.os.SystemClock
 import android.provider.MediaStore
 import androidx.camera.core.ImageCapture
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.Portrait
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.Color
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.utils.ImageSegmenterHelper
@@ -209,7 +214,6 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         return img
     }
 
-
     fun applyBlurBasedOnMask(context: Context, imageUri: Uri, categoryMask: ByteBuffer): Bitmap? {
         // Step 1: Load the image from URI
         val capturedImage = loadBitmapFromUri(context, imageUri) ?: return null
@@ -281,7 +285,37 @@ class PortraitModePlugin : IPlugin, ImageSegmenterHelper.SegmenterListener {
         }
     }
 
-    override val settings: List<PluginSetting> = emptyList() // No settings for portrait yet
+    override val settings: List<PluginSetting> = listOf(
+        PluginSetting.EnumSetting(
+            key = "portraitMode",
+            defaultValue = "OFF",
+            options = listOf("OFF", "ON"),
+            render = { isEnabled ->
+                Icon(
+                    imageVector = when (isEnabled) {
+                        "OFF" -> Icons.Default.PersonOff
+                        "ON" -> Icons.Default.Portrait
+                        else -> {
+                            Icons.Default.PersonOff
+                        }
+                    },
+                    contentDescription = when (isEnabled) {
+                        "OFF" -> "Portrait Mode Off"
+                        "ON" -> "Portrait Mode On"
+                        else -> {
+                            "Portrait Mode Off"
+                        }
+                    },
+                    tint = Color.White
+                )
+
+            },
+            onChange = { viewModel, value ->
+                viewModel.recreateUseCases()
+            },
+            renderLocation = SettingLocation.TOP
+        )
+    )
 
     override fun onError(error: String, errorCode: Int) {
         TODO("Not yet implemented")
