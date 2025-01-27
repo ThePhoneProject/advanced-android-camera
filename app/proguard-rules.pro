@@ -26,3 +26,4 @@
 -dontwarn javax.lang.model.type.TypeMirror*
 -dontwarn javax.lang.model.type.TypeVisitor*
 -dontwarn javax.lang.model.util.SimpleTypeVisitor8*
+-dontwarn javax.lang.model.SourceVersion*
