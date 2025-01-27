@@ -18,7 +18,7 @@ junitJunit = "4.12"
 monitor = "1.7.2"
 junitKtx = "1.2.1"
 mediapipeTaskVision = "0.20230731"
-coroutines = "1.10.1"
+coroutines = "1.8.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
