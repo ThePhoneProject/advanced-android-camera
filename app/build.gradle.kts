@@ -85,8 +85,8 @@ dependencies {
     implementation(libs.barcode.scanning)
 
     //Mediapipe for segmentation (portrait)
-    implementation("com.google.mediapipe:tasks-vision:latest.release")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android")
+    implementation(libs.tasks.vision)
+    implementation(libs.coroutines)
 }
 
 
