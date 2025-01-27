@@ -8,7 +8,6 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenter
 import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenterResult
-import java.nio.ByteBuffer
 
 class ImageSegmenterHelper(
     var currentDelegate: Int = DELEGATE_CPU,
@@ -16,8 +15,6 @@ class ImageSegmenterHelper(
     val context: Context,
 ) {
 
-    // For this example this needs to be a var so it can be reset on changes. If the Imagesegmenter
-    // will not change, a lazy val would be preferable.
     private var imagesegmenter: ImageSegmenter? = null
 
     init {
@@ -79,20 +76,9 @@ class ImageSegmenterHelper(
         }
     }
 
-    // Runs image segmentation on single image and
-    // returns the results asynchronously to the caller.
     fun segmentImageFile(mpImage: MPImage): ImageSegmenterResult? {
         return imagesegmenter?.segment(mpImage)
     }
-
-    // Wraps results from inference, the time it takes for inference to be
-    // performed.
-    data class ResultBundle(
-        val results: ByteBuffer,
-        val width: Int,
-        val height: Int,
-        val inferenceTime: Long,
-    )
 
     companion object {
         const val DELEGATE_CPU = 0
