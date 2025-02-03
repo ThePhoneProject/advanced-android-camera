@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
+import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonOff
@@ -14,9 +15,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Color
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
-import co.stonephone.stonecamera.utils.ImageSegmenterHelper
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.ByteBufferExtractor
+import com.google.mediapipe.tasks.core.BaseOptions
+import com.google.mediapipe.tasks.core.Delegate
+import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenter
 import com.google.mediapipe.tasks.vision.imagesegmenter.ImageSegmenterResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,20 +30,21 @@ import java.util.Objects
 import kotlin.math.max
 import kotlin.math.min
 
+
 class PortraitModePlugin : IPlugin {
     override val id: String = "portraitModePlugin"
     override val name: String = "Portrait Mode"
 
-    private lateinit var imageSegmenterHelper: ImageSegmenterHelper
+    private val logTag: String = "PortraitMode"
+
+    private var imagesegmenter: ImageSegmenter? = null
+
+    init {
+        setupImageSegmenter()
+    }
 
     override fun initialize(viewModel: StoneCameraViewModel) {
-        imageSegmenterHelper = ImageSegmenterHelper(
-            context = MyApplication.getAppContext(),
-            currentModel = ImageSegmenterHelper.MODEL_SELFIE_SEGMENTER,
-            currentDelegate = ImageSegmenterHelper.DELEGATE_CPU,
-        )
-
-        imageSegmenterHelper.setupImageSegmenter()
+        setupImageSegmenter()
     }
 
     override fun onImageSaved(
@@ -61,10 +66,10 @@ class PortraitModePlugin : IPlugin {
             val rotation: Int = getOriginalImageRotation(contentResolver, originalImageUri)
 
             val segmentationResults: ImageSegmenterResult =
-                imageSegmenterHelper.segmentImageFile(BitmapImageBuilder(originalImage).build())
+                imagesegmenter?.segment(BitmapImageBuilder(originalImage).build())
                     ?: return@launch
 
-            // TODO Blur mask edge with https://developer.android.com/reference/android/graphics/BlurMaskFilter
+            // TODO try and use the confidence mask. Will give floats in range 0 => 1. Apply blur on a percent of the confidence.
             val backgroundMask: ByteBuffer =
                 ByteBufferExtractor.extract(segmentationResults.categoryMask().get())
 
@@ -133,7 +138,7 @@ class PortraitModePlugin : IPlugin {
         )
     }
 
-    // Stolen from https://stackoverflow.com/questions/21418892/understanding-super-fast-blur-algorithm?fbclid=IwZXh0bgNhZW0CMTEAAR1w91ucNtw4nU-Z8Z9RyMYFVUHWxfgt7ivsE7foTkwR2wmdx2losQqQ0sk_aem_Zrf_8344PRxW6SFzutkE7g
+    // Borrowed from https://stackoverflow.com/questions/21418892/understanding-super-fast-blur-algorithm?fbclid=IwZXh0bgNhZW0CMTEAAR1w91ucNtw4nU-Z8Z9RyMYFVUHWxfgt7ivsE7foTkwR2wmdx2losQqQ0sk_aem_Zrf_8344PRxW6SFzutkE7g
     // Edited to apply the blur only on the mask
     private fun fastBlur(original: Bitmap, mask: ByteBuffer, radius: Int): Bitmap {
         if (radius < 1) {
@@ -298,5 +303,28 @@ class PortraitModePlugin : IPlugin {
                 label = "Portrait Mode"
             )
         )
+    }
+
+    private fun setupImageSegmenter() {
+        val baseOptionsBuilder = BaseOptions.builder()
+        baseOptionsBuilder.setDelegate(Delegate.GPU)
+        baseOptionsBuilder.setModelAssetPath("selfie_segmenter.tflite")
+
+        try {
+            val baseOptions = baseOptionsBuilder.build()
+            val optionsBuilder = ImageSegmenter.ImageSegmenterOptions.builder()
+                .setRunningMode(RunningMode.IMAGE)
+                .setBaseOptions(baseOptions)
+                .setOutputCategoryMask(true)
+                .setOutputConfidenceMasks(true)
+
+            val options = optionsBuilder.build()
+            imagesegmenter = ImageSegmenter.createFromOptions(MyApplication.getAppContext(), options)
+        } catch (e: IllegalStateException) {
+            Log.e(logTag, "Image segmenter failed to load model with error: " + e.message)
+        } catch (e: RuntimeException) {
+            // This occurs if the model being used does not support GPU
+            Log.e(logTag, "Image segmenter failed to load model with error: " + e.message)
+        }
     }
 }
