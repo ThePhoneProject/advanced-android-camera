@@ -27,7 +27,7 @@ open class PhotoModePlugin : IPlugin {
     override val id: String = "photoMode"
     override val name: String = "Photo Mode"
 
-    private lateinit var viewModel: StoneCameraViewModel
+    protected lateinit var viewModel: StoneCameraViewModel
 
     // Should Analysis be added by QRScanner instead? Probably doesn't matter for now
     override val modeUseCases: List<PluginUseCase>

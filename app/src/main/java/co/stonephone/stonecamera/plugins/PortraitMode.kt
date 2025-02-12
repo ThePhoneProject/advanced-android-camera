@@ -34,13 +34,13 @@ class PortraitModePlugin : PhotoModePlugin() {
         get() = "portrait"
 
     private var imageSegmenter: ImageSegmenter? = null
-    private lateinit var viewModel: StoneCameraViewModel
 
     init {
         setupImageSegmenter()
     }
 
     override fun initialize(viewModel: StoneCameraViewModel) {
+        super.initialize(viewModel)
         setupImageSegmenter()
     }
 
@@ -50,7 +50,7 @@ class PortraitModePlugin : PhotoModePlugin() {
     ) {
 
         //TODO: This kind of check should probably be built into the plugin interface, something reusable
-        if (viewModel.selectedMode == modeLabel) {
+        if (viewModel.selectedMode != modeLabel) {
             return
         }
 
@@ -269,7 +269,9 @@ class PortraitModePlugin : PhotoModePlugin() {
 
     private fun setupImageSegmenter() {
         val baseOptionsBuilder = BaseOptions.builder()
-        baseOptionsBuilder.setDelegate(Delegate.GPU)
+        //TODO fix error when using gpu mode
+        // Error occurs when getting MediaPipe task result. com.google.mediapipe.framework.MediaPipeException: invalid argument: Expected buffer size 31961088 got: 7990272, width 3264, height 2448, channels 1
+        baseOptionsBuilder.setDelegate(Delegate.CPU)
         baseOptionsBuilder.setModelAssetPath("selfie_segmenter.tflite")
 
         try {
@@ -278,7 +280,7 @@ class PortraitModePlugin : PhotoModePlugin() {
                 .setRunningMode(RunningMode.IMAGE)
                 .setBaseOptions(baseOptions)
                 .setOutputCategoryMask(true)
-                .setOutputConfidenceMasks(true)
+                .setOutputConfidenceMasks(false)
 
             val options = optionsBuilder.build()
             imageSegmenter = ImageSegmenter.createFromOptions(MyApplication.getAppContext(), options)
