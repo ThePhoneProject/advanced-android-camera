@@ -30,7 +30,6 @@ import java.util.Objects
 import kotlin.math.max
 import kotlin.math.min
 
-
 class PortraitModePlugin : IPlugin {
     override val id: String = "portraitModePlugin"
     override val name: String = "Portrait Mode"
@@ -268,41 +267,6 @@ class PortraitModePlugin : IPlugin {
         img.setPixels(pix, 0, w, 0, 0, w, h)
 
         return img
-    }
-
-    override val settings: (StoneCameraViewModel) -> List<PluginSetting> = { viewModel ->
-        listOf(
-            PluginSetting.EnumSetting(
-                key = "portraitMode",
-                defaultValue = "OFF",
-                options = listOf("OFF", "ON"),
-                render = { isEnabled, isSelected ->
-                    Icon(
-                        imageVector = when (isEnabled) {
-                            "OFF" -> Icons.Default.PersonOff
-                            "ON" -> Icons.Default.Portrait
-                            else -> {
-                                Icons.Default.PersonOff
-                            }
-                        },
-                        contentDescription = when (isEnabled) {
-                            "OFF" -> "Portrait Mode Off"
-                            "ON" -> "Portrait Mode On"
-                            else -> {
-                                "Portrait Mode Off"
-                            }
-                        },
-                        tint = if (isSelected) Color(0xFFFFCC00) else Color.White
-                    )
-
-                },
-                onChange = { viewModel, value ->
-                    viewModel.recreateUseCases()
-                },
-                renderLocation = SettingLocation.TOP,
-                label = "Portrait Mode"
-            )
-        )
     }
 
     private fun setupImageSegmenter() {
