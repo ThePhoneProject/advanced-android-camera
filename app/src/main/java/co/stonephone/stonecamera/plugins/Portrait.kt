@@ -8,11 +8,6 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
 import androidx.camera.core.ImageCapture
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonOff
-import androidx.compose.material.icons.filled.Portrait
-import androidx.compose.material3.Icon
-import androidx.compose.ui.graphics.Color
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
 import com.google.mediapipe.framework.image.BitmapImageBuilder
