@@ -4,10 +4,10 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
 import androidx.camera.core.ImageCapture
+import androidx.exifinterface.media.ExifInterface
 import co.stonephone.stonecamera.MyApplication
 import co.stonephone.stonecamera.StoneCameraViewModel
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -21,17 +21,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
-import java.util.Objects
 import kotlin.math.max
 import kotlin.math.min
 
-class PortraitModePlugin : IPlugin {
-    override val id: String = "portraitModePlugin"
+class PortraitModePlugin : PhotoModePlugin() {
+    override val id: String = "portraitMode"
     override val name: String = "Portrait Mode"
 
     private val logTag: String = "PortraitMode"
 
-    private var imagesegmenter: ImageSegmenter? = null
+    override val modeLabel
+        get() = "portrait"
+
+    private var imageSegmenter: ImageSegmenter? = null
+    private lateinit var viewModel: StoneCameraViewModel
 
     init {
         setupImageSegmenter()
@@ -45,9 +48,9 @@ class PortraitModePlugin : IPlugin {
         stoneCameraViewModel: StoneCameraViewModel,
         outputFileResults: ImageCapture.OutputFileResults
     ) {
-        val portraitModeSetting = stoneCameraViewModel.getSetting<String>("portraitMode") ?: "OFF"
 
-        if (Objects.equals(portraitModeSetting, "OFF")) {
+        //TODO: This kind of check should probably be built into the plugin interface, something reusable
+        if (viewModel.selectedMode == modeLabel) {
             return
         }
 
@@ -60,7 +63,7 @@ class PortraitModePlugin : IPlugin {
             val rotation: Int = getOriginalImageRotation(contentResolver, originalImageUri)
 
             val segmentationResults: ImageSegmenterResult =
-                imagesegmenter?.segment(BitmapImageBuilder(originalImage).build())
+                imageSegmenter?.segment(BitmapImageBuilder(originalImage).build())
                     ?: return@launch
 
             // TODO try and use the confidence mask. Will give floats in range 0 => 1. Apply blur on a percent of the confidence.
@@ -278,7 +281,7 @@ class PortraitModePlugin : IPlugin {
                 .setOutputConfidenceMasks(true)
 
             val options = optionsBuilder.build()
-            imagesegmenter = ImageSegmenter.createFromOptions(MyApplication.getAppContext(), options)
+            imageSegmenter = ImageSegmenter.createFromOptions(MyApplication.getAppContext(), options)
         } catch (e: IllegalStateException) {
             Log.e(logTag, "Image segmenter failed to load model with error: " + e.message)
         } catch (e: RuntimeException) {

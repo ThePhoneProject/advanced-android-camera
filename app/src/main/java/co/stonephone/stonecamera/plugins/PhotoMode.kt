@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import co.stonephone.stonecamera.StoneCameraViewModel
 import co.stonephone.stonecamera.ui.ResponsiveOrientation
 
-class PhotoModePlugin : IPlugin {
+open class PhotoModePlugin : IPlugin {
     override val id: String = "photoMode"
     override val name: String = "Photo Mode"
 
@@ -31,7 +31,7 @@ class PhotoModePlugin : IPlugin {
 
     // Should Analysis be added by QRScanner instead? Probably doesn't matter for now
     override val modeUseCases: List<PluginUseCase>
-        get() = listOf(PluginUseCase.PHOTO, PluginUseCase.PORTRAIT, PluginUseCase.ANALYSIS, PluginUseCase.VIDEO)
+        get() = listOf(PluginUseCase.PHOTO, PluginUseCase.ANALYSIS, PluginUseCase.VIDEO)
 
     override val modeLabel
         get() = "photo"

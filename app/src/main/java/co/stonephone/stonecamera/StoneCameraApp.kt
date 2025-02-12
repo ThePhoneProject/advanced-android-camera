@@ -5,7 +5,6 @@ package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
 import android.graphics.Rect
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -21,16 +20,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,8 +51,8 @@ import co.stonephone.stonecamera.plugins.SettingLocation
 import co.stonephone.stonecamera.plugins.SettingsTrayPlugin
 import co.stonephone.stonecamera.plugins.ShutterFlashPlugin
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
-import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
 import co.stonephone.stonecamera.plugins.VideoModePlugin
+import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
 import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
@@ -71,7 +64,6 @@ import co.stonephone.stonecamera.utils.getAllCamerasInfo
 // Order here is important, they are loaded and initialised in the order they are listed
 // ZoomBar depends on ZoomBase, etc.
 val PLUGINS = listOf(
-    PortraitModePlugin(),
     QRScannerPlugin(),
     ZoomBasePlugin(),
     ZoomBarPlugin(),
@@ -83,6 +75,7 @@ val PLUGINS = listOf(
     ShutterFlashPlugin(),
     VolumeControlsPlugin(),
     PhotoModePlugin(),
+    PortraitModePlugin(),
     VideoModePlugin(),
     SettingsTrayPlugin()
 //    DebugPlugin()
