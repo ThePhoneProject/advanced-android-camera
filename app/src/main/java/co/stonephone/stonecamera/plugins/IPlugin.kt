@@ -12,7 +12,7 @@ import kotlinx.coroutines.CompletableDeferred
 
 // PluginUseCase Enum ("photo", "analysis", "video")
 enum class PluginUseCase {
-    PHOTO, ANALYSIS, VIDEO
+    PHOTO, PORTRAIT, ANALYSIS, VIDEO
 }
 
 // Plugin interface definition
