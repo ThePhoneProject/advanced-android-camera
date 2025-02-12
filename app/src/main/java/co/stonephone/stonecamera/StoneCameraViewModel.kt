@@ -11,7 +11,12 @@ import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.OptIn
-import androidx.camera.core.*
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
@@ -19,7 +24,10 @@ import androidx.camera.video.Recorder
 import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.view.PreviewView
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -138,7 +146,6 @@ class StoneCameraViewModel(
         // Rebuild use-cases to match our persisted prefs
         recreateUseCases()
     }
-
 
     //--------------------------------------------------------------------------------
     // Public methods to manipulate the above states

@@ -83,6 +83,10 @@ dependencies {
 
     // ML Kit for Barcode/QR scanning
     implementation(libs.barcode.scanning)
+
+    //Mediapipe for segmentation (portrait)
+    implementation(libs.tasks.vision)
+    implementation(libs.coroutines)
 }
 
 

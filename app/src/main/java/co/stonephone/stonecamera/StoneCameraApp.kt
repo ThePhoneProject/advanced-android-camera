@@ -5,23 +5,35 @@ package co.stonephone.stonecamera
 
 import android.annotation.SuppressLint
 import android.graphics.Rect
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipCameraAndroid
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -33,13 +45,14 @@ import co.stonephone.stonecamera.plugins.FlashPlugin
 import co.stonephone.stonecamera.plugins.FocusBasePlugin
 import co.stonephone.stonecamera.plugins.PhotoModePlugin
 import co.stonephone.stonecamera.plugins.PinchToZoomPlugin
+import co.stonephone.stonecamera.plugins.PortraitModePlugin
 import co.stonephone.stonecamera.plugins.QRScannerPlugin
 import co.stonephone.stonecamera.plugins.SettingLocation
 import co.stonephone.stonecamera.plugins.SettingsTrayPlugin
 import co.stonephone.stonecamera.plugins.ShutterFlashPlugin
 import co.stonephone.stonecamera.plugins.TapToFocusPlugin
-import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
 import co.stonephone.stonecamera.plugins.VideoModePlugin
+import co.stonephone.stonecamera.plugins.VolumeControlsPlugin
 import co.stonephone.stonecamera.plugins.ZoomBarPlugin
 import co.stonephone.stonecamera.plugins.ZoomBasePlugin
 import co.stonephone.stonecamera.ui.RenderPluginSetting
@@ -62,6 +75,7 @@ val PLUGINS = listOf(
     ShutterFlashPlugin(),
     VolumeControlsPlugin(),
     PhotoModePlugin(),
+    PortraitModePlugin(),
     VideoModePlugin(),
     SettingsTrayPlugin()
 //    DebugPlugin()
